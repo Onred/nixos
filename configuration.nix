@@ -3,10 +3,11 @@
 {
   imports =
     [
-      ./hardware-configuration.nix
+      etc/nixos/hardware-configuration.nix
     ];
 
-  boot.kernelPackages = pkgs.linuxPackages_zen;
+  # boot.kernelPackages = pkgs.linuxPackages_zen;
+  boot.kernelPackages = pkgs.linuxPackages_cachyos;
   hardware.graphics.enable = true;
   hardware.bluetooth.enable = true;
   services.xserver.videoDrivers = [ "nvidia" ];
@@ -28,7 +29,7 @@
 
   users.users.onred = {
     isNormalUser = true;
-    extraGroups = [ "wheel" ]; # Enable ‘sudo’ for the user.
+    extraGroups = [ "wheel" ];
     packages = with pkgs; [ ];
   };
 
@@ -42,8 +43,9 @@
   ];
 
   # programs.niri.enable = true;
-  programs.hyprland.enable = true;
-  # services.displayManager.gdm.enable = true;
+  # programs.hyprland.enable = true;
+  services.displayManager.cosmic-greeter.enable = true;
+  services.desktopManager.cosmic.enable = true;
 
   fonts.packages = with pkgs; [
     nerd-fonts.jetbrains-mono
@@ -64,11 +66,11 @@
     teamviewer.enable = true;
   };
 
-  stylix = {
-    enable = true;
-    base16Scheme = "${pkgs.base16-schemes}/share/themes/tokyo-night-dark.yaml";
-    polarity = "dark";
-  };
+  # stylix = {
+  #   enable = true;
+  #   base16Scheme = "${pkgs.base16-schemes}/share/themes/tokyo-night-dark.yaml";
+  #   polarity = "dark";
+  # };
 
   nixpkgs.config.allowUnfree = true;
   nix.settings.experimental-features = [ "nix-command" "flakes" ];

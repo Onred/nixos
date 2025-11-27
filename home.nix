@@ -7,7 +7,6 @@ let
     [
       "niri"
       "hypr"
-      "nvim"
     ]
   );
 in
@@ -15,8 +14,7 @@ in
 {
   imports = [
     ./modules/neovim.nix
-    inputs.dankMaterialShell.homeModules.dankMaterialShell.default
-    # inputs.noctalia.homeModules.default
+    # inputs.dankMaterialShell.homeModules.dankMaterialShell.default
   ];
 
   home.username = "onred";
@@ -54,23 +52,20 @@ in
   programs.firefox.enable = true;
   programs.firefox.profiles.default.extensions.force = true;
 
-  programs.dankMaterialShell = {
-    enable = true;
-    quickshell.package = inputs.quickshell.packages.x86_64-linux.quickshell;
-  };
+  # programs.dankMaterialShell = {
+  #   enable = true;
+  #   quickshell.package = inputs.quickshell.packages.x86_64-linux.quickshell;
+  # };
 
-  stylix.targets = {
-    neovim.enable = false;
-    firefox.profileNames = [ "default" ];
-    firefox.colorTheme.enable = true;
-  };
-  # programs.noctalia-shell.enable = true;
-  # programs.noctalia-shell.systemd.enable = true;
+  # stylix.targets = {
+  #   firefox.profileNames = [ "default" ];
+  #   firefox.colorTheme.enable = true;
+  # };
 
   # Make linked xdg config files from the configs listed above
   xdg.configFile = builtins.mapAttrs
     (nixpath: dotpath: {
-      source = create_symlink "${dotfiles}/config/${dotpath}";
+      source = create_symlink "${dotfiles}/.config/${dotpath}";
       recursive = true;
     })
     configs;
