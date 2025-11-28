@@ -31,12 +31,16 @@ in
     nautilus
     pavucontrol
     radeontop
+    hypridle
+    rofi
+    waybar
   ];
 
   programs.bash = {
     enable = true;
     shellAliases = {
-      nrs = "nh os switch -ua ${dotfiles}";
+      upgrade = "nh os boot -ua ${dotfiles}";
+      update = "nh os switch -a ${dotfiles}";
     };
     initExtra = ''
       export PS1='\[\e[38;5;75m\]\u\[\e[38;5;75m\]@\[\e[38;5;75m\]\h\[\e[0m\] \[\e[38;5;113m\]\w\[\e[0m\] \[\e[38;5;189m\]\$\[\e[0m\] '
@@ -57,10 +61,10 @@ in
   #   quickshell.package = inputs.quickshell.packages.x86_64-linux.quickshell;
   # };
 
-  # stylix.targets = {
-  #   firefox.profileNames = [ "default" ];
-  #   firefox.colorTheme.enable = true;
-  # };
+  stylix.targets = {
+    firefox.profileNames = [ "default" ];
+    firefox.colorTheme.enable = true;
+  };
 
   # Make linked xdg config files from the configs listed above
   xdg.configFile = builtins.mapAttrs

@@ -3,7 +3,7 @@
 {
   imports =
     [
-      etc/nixos/hardware-configuration.nix
+      ./hardware-configuration.nix
     ];
 
   # boot.kernelPackages = pkgs.linuxPackages_zen;
@@ -43,9 +43,9 @@
   ];
 
   # programs.niri.enable = true;
-  # programs.hyprland.enable = true;
-  services.displayManager.cosmic-greeter.enable = true;
-  services.desktopManager.cosmic.enable = true;
+  programs.hyprland.enable = true;
+  # services.displayManager.cosmic-greeter.enable = true;
+  # services.desktopManager.cosmic.enable = true;
 
   fonts.packages = with pkgs; [
     nerd-fonts.jetbrains-mono
@@ -66,11 +66,11 @@
     teamviewer.enable = true;
   };
 
-  # stylix = {
-  #   enable = true;
-  #   base16Scheme = "${pkgs.base16-schemes}/share/themes/tokyo-night-dark.yaml";
-  #   polarity = "dark";
-  # };
+  stylix = {
+    enable = true;
+    base16Scheme = "${pkgs.base16-schemes}/share/themes/tokyo-night-dark.yaml";
+    polarity = "dark";
+  };
 
   nixpkgs.config.allowUnfree = true;
   nix.settings.experimental-features = [ "nix-command" "flakes" ];

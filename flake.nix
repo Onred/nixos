@@ -23,10 +23,10 @@
     #   inputs.nixpkgs.follows = "nixpkgs";
     # };
 
-    # stylix = {
-    #   url = "github:nix-community/stylix";
-    #   inputs.nixpkgs.follows = "nixpkgs";
-    # };
+    stylix = {
+      url = "github:nix-community/stylix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = { self, nixpkgs, chaotic, home-manager, ... } @ inputs: {
@@ -34,7 +34,7 @@
       system = "x86_64-linux";
       modules = [
         ./configuration.nix
-        # inputs.stylix.nixosModules.stylix
+        inputs.stylix.nixosModules.stylix
 	chaotic.nixosModules.default
         home-manager.nixosModules.home-manager
         {
