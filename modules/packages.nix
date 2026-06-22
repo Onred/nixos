@@ -11,7 +11,7 @@
     neovim
     pavucontrol
     protonup-qt
-    vscode
+    (vscode.fhsWithPackages (packages: [ packages.stdenv.cc.cc ]))
 
     # Command line
     btop

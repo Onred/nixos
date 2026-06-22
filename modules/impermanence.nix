@@ -9,9 +9,8 @@
       "/var/log"
       "/var/db/sudo"
       "/var/lib/nixos"
-      "/etc/cups"
       "/var/lib/cups"
-      "/var/lib/ollama"
+      "/var/lib/private/ollama"
       {
         directory = "/var/lib/bluetooth";
         mode = "0700";
