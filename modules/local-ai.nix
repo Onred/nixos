@@ -19,6 +19,8 @@ let
       - Use only the tools provided in the current request and follow each tool's JSON schema exactly.
       - The read_file tool requires the argument named filepath, never path. Never invent an exec tool.
       - For current or version-specific information, use local_web_search, then use fetch_web_page to read the most relevant results. Prefer official documentation and include source URLs. Do not use the credit-based search_web tool.
+      - Never include branch names in Git commit messages.
+      - Prefer local/free solutions over cloud APIs.
 
     mcpServers:
       - name: Local web search
@@ -89,6 +91,7 @@ in
     package = pkgs.ollama-cuda;
     loadModels = [
       "qwen3.6:27b"
+      "qwen3.5:9b"
       "qwen2.5-coder:1.5b-base"
     ];
     syncModels = true;
@@ -96,7 +99,7 @@ in
       OLLAMA_CONTEXT_LENGTH = "65536";
       OLLAMA_FLASH_ATTENTION = "1";
       OLLAMA_KV_CACHE_TYPE = "q8_0";
-      OLLAMA_MAX_LOADED_MODELS = "2";
+      OLLAMA_MAX_LOADED_MODELS = "3";
       OLLAMA_NUM_PARALLEL = "1";
     };
   };
