@@ -11,6 +11,7 @@ Fresh NixOS desktop installation using flakes, Disko, and impermanence.
 - Limine with Secure Boot signing
 - NetworkManager, Bluetooth, PipeWire, and CUPS
 - Steam, Firefox, Neovim, VS Code, Discord, and basic system tools
+- Local coding agents and inline completion backed by Ollama and CUDA
 - Btrfs with ephemeral `/` and persistent `/nix`, `/persist`, and `/home`
 - Automatic hardware detection and password setup during installation
 
@@ -114,6 +115,29 @@ For boot, filesystem, or impermanence changes:
 ```console
 sudo nixos-rebuild boot --flake .#nixos
 sudo reboot
+```
+
+## Local coding models
+
+Ollama downloads the declared models in the background after activation. The
+initial download is about 20 GB and is retained under `/var/lib/ollama` across
+ephemeral-root resets.
+
+Install the Continue extension from VS Code's Extensions view. Its declarative
+configuration uses Qwen3.6 27B for Agent mode and Qwen2.5-Coder 1.5B for inline
+completion. For the Qwen-specific agent harness, open a VS Code terminal in the
+project and run:
+
+```console
+qwen
+```
+
+Both clients use the local Ollama service without an account or API key. Check
+model download status and GPU offloading with:
+
+```console
+systemctl status ollama-model-loader
+ollama ps
 ```
 
 [^this-machine]: After verifying serial `S6B0NL0W144498J`, the original machine
