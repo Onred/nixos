@@ -38,7 +38,7 @@ let
           - tool_use
           - image_input
         defaultCompletionOptions:
-          contextLength: 98304
+          contextLength: 65536
           maxTokens: 8192
           temperature: 0.6
           topP: 0.95
@@ -93,7 +93,7 @@ in
     ];
     syncModels = true;
     environmentVariables = {
-      OLLAMA_CONTEXT_LENGTH = "98304";
+      OLLAMA_CONTEXT_LENGTH = "65536";
       OLLAMA_FLASH_ATTENTION = "1";
       OLLAMA_KV_CACHE_TYPE = "q8_0";
       OLLAMA_MAX_LOADED_MODELS = "2";
@@ -113,7 +113,7 @@ in
         baseUrl = "http://127.0.0.1:11434/v1";
         envKey = "OLLAMA_API_KEY";
         generationConfig = {
-          contextWindowSize = 98304;
+          contextWindowSize = 65536;
           samplingParams = {
             temperature = 0.6;
             top_p = 0.95;
