@@ -1,11 +1,15 @@
-import json
+import asyncio
+import logging
 import re
 from html.parser import HTMLParser
-from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode, urlparse
-from urllib.request import Request, urlopen
+
+import httpx
 
 from mcp.server.fastmcp import FastMCP
+
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.WARNING)
 
 mcp = FastMCP("Local web search")
 
@@ -73,7 +77,7 @@ class PageTextParser(HTMLParser):
 
 
 @mcp.tool()
-def local_web_search(query: str, max_results: int = 8) -> str:
+async def local_web_search(query: str, max_results: int = 8) -> str:
     """Search the web through the local SearXNG instance."""
     limit = max(1, min(max_results, 20))
     url = "http://127.0.0.1:8080/search?" + urlencode(
@@ -81,10 +85,12 @@ def local_web_search(query: str, max_results: int = 8) -> str:
     )
 
     try:
-        with urlopen(url, timeout=30) as response:
-            results = json.load(response).get("results", [])[:limit]
-    except (HTTPError, URLError, TimeoutError, json.JSONDecodeError) as error:
-        return f"Local web search failed: {error}"
+        async with httpx.AsyncClient(timeout=30) as client:
+            response = await client.get(url)
+            response.raise_for_status()
+            results = response.json().get("results", [])[:limit]
+    except Exception as exc:
+        return f"Local web search failed: {exc}"
 
     if not results:
         return "No results found."
@@ -98,26 +104,32 @@ def local_web_search(query: str, max_results: int = 8) -> str:
 
 
 @mcp.tool()
-def fetch_web_page(url: str, max_characters: int = 20000) -> str:
+async def fetch_web_page(url: str, max_characters: int = 20000) -> str:
     """Read an HTTP(S) documentation or web page as plain text."""
     parsed_url = urlparse(url)
     if parsed_url.scheme not in {"http", "https"} or not parsed_url.netloc:
         return "Only complete HTTP(S) URLs are supported."
 
     character_limit = max(4000, min(max_characters, 40000))
-    request = Request(
-        url,
-        headers={"User-Agent": "Mozilla/5.0 (local-web-search/1.0)"},
-    )
 
     try:
-        with urlopen(request, timeout=30) as response:
-            content_type = response.headers.get_content_type()
-            charset = response.headers.get_content_charset() or "utf-8"
-            final_url = response.geturl()
-            body = response.read(2000001)
-    except (HTTPError, URLError, TimeoutError, ValueError) as error:
-        return f"Page fetch failed: {error}"
+        async with httpx.AsyncClient(timeout=30) as client:
+            response = await client.get(
+                url,
+                headers={"User-Agent": "Mozilla/5.0 (local-web-search/1.0)"},
+                follow_redirects=True,
+            )
+            content_type = response.headers.get("content-type", "")
+            charset = (
+                response.charset
+                if hasattr(response, "charset")
+                else _extract_charset(content_type)
+                or "utf-8"
+            )
+            final_url = str(response.url)
+            body = response.read()[:2000000]
+    except Exception as exc:
+        return f"Page fetch failed: {exc}"
 
     if not (
         content_type.startswith("text/")
@@ -126,7 +138,7 @@ def fetch_web_page(url: str, max_characters: int = 20000) -> str:
         return f"Unsupported page content type: {content_type}"
 
     download_truncated = len(body) > 2000000
-    decoded = body[:2000000].decode(charset, errors="replace")
+    decoded = body.decode(charset, errors="replace")
     if content_type in {"text/html", "application/xhtml+xml"}:
         parser = PageTextParser()
         parser.feed(decoded)
@@ -150,5 +162,13 @@ def fetch_web_page(url: str, max_characters: int = 20000) -> str:
     return f"Source: {final_url}\n\n{text}{truncation_note}"
 
 
+def _extract_charset(content_type: str) -> str | None:
+    for part in content_type.split(";"):
+        part = part.strip()
+        if part.lower().startswith("charset="):
+            return part.split("=", 1)[1].strip().strip('"')
+    return None
+
+
 if __name__ == "__main__":
-    mcp.run(transport="stdio")
+    asyncio.run(mcp.run(transport="stdio"))

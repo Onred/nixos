@@ -3,7 +3,10 @@
 let
   localWebSearch =
     let
-      python = pkgs.python3.withPackages (pythonPackages: [ pythonPackages.mcp ]);
+      python = pkgs.python3.withPackages (pythonPackages: [
+        pythonPackages.httpx
+        pythonPackages.mcp
+      ]);
       server = ./local-ai-web-search.py;
     in
     pkgs.writeShellScriptBin "local-web-search" ''
