@@ -75,6 +75,6 @@ in
 
   systemd.tmpfiles.rules = [
     "d /home/${username}/.qwen 0700 ${username} users -"
-    "L+ /home/${username}/.qwen/settings.json - ${username} users - /etc/local-ai/qwen-settings.json"
+    "L+ /home/${username}/.qwen/settings.json - ${username} users - /run/current-system/etc/local-ai/qwen-settings.json"
   ];
 }

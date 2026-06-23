@@ -18,8 +18,8 @@ let
 
     - Prefer local/free tools over cloud APIs.
     - For current or version-specific facts, use local_web_search first, then fetch_web_page. Prefer official docs and cite URLs.
+    - If fetch_web_page returns little useful text, do not retry the same URL; try another result.
     - Never include branch names in Git commit messages.
-    - Do not run Nix builds, nixos-rebuild, activation, or runtime tests; give the user commands and wait for results.
   '';
 in
 {
@@ -31,7 +31,9 @@ in
     "d /home/${username}/.cline/data 0700 ${username} users -"
     "d /home/${username}/.cline/data/settings 0700 ${username} users -"
     "d /home/${username}/.cline/rules 0700 ${username} users -"
-    "L+ /home/${username}/.cline/data/settings/cline_mcp_settings.json - ${username} users - /etc/local-ai/cline-mcp-settings.json"
-    "L+ /home/${username}/.cline/rules/local-ai.md - ${username} users - /etc/local-ai/cline-rules/local-ai.md"
+    "L+ /home/${username}/.cline/data/settings/cline_mcp_settings.json - ${username} users - /run/current-system/etc/local-ai/cline-mcp-settings.json"
+    "L+ /home/${username}/.cline/rules/local-ai.md - ${username} users - /run/current-system/etc/local-ai/cline-rules/local-ai.md"
+    "d /home/${username}/.config/Code/User/globalStorage/saoudrizwan.claude-dev/settings 0700 ${username} users -"
+    "L+ /home/${username}/.config/Code/User/globalStorage/saoudrizwan.claude-dev/settings/cline_mcp_settings.json - ${username} users - /run/current-system/etc/local-ai/cline-mcp-settings.json"
   ];
 }

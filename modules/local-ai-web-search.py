@@ -136,6 +136,14 @@ def fetch_web_page(url: str, max_characters: int = 20000) -> str:
 
     text_truncated = len(text) > character_limit
     text = text[:character_limit]
+    if len(text) < 300:
+        return (
+            f"Source: {final_url}\n\n"
+            "This page returned very little readable text. It may be a JavaScript app, "
+            "an empty page, or a page that blocks simple fetches. Do not retry this "
+            "same URL; use another search result or a direct documentation page."
+            f"\n\n{text}"
+        )
     truncation_note = (
         "\n\n[Content truncated.]" if download_truncated or text_truncated else ""
     )

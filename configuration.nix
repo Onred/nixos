@@ -8,7 +8,7 @@
     ./modules/impermanence.nix # Ephemeral root and persistent state
     ./modules/local-ai.nix # Local coding models and shared web search
     ./modules/local-ai-cline.nix # Optional Cline editor integration
-    ./modules/local-ai-continue.nix # Optional Continue editor integration
+    # ./modules/local-ai-continue.nix # Optional Continue editor integration
     ./modules/nvidia.nix # NVIDIA graphics driver
     ./modules/packages.nix # System and user packages
   ];

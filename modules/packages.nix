@@ -20,7 +20,9 @@
 
   environment.systemPackages = with pkgs; [
     git
+    jq
     nh
+    python3
     sbctl
     tree
     wget

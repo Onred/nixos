@@ -42,8 +42,6 @@ NixOS installation for host `nixos` on an AMD/NVIDIA desktop.
   receiving explicit confirmation
 - Before destructive disk operations, verify the target disk by `/dev/disk/by-id`,
   model, serial, and current layout
-- Do not run Nix builds, `nixos-rebuild`, activation, or runtime tests;
-  give the user commands and wait for results
 - For boot-critical, filesystem, or impermanence changes, prefer
   `nixos-rebuild boot` after a successful build
 - Never include branch names in commit messages
