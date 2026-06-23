@@ -119,20 +119,36 @@ sudo reboot
 
 ## Local coding models
 
-Ollama downloads the declared models in the background after activation. The
-initial download is about 20 GB and is retained under `/var/lib/ollama` across
-ephemeral-root resets.
+Ollama downloads the declared models in the background after activation. Models
+are retained under `/var/lib/ollama` across ephemeral-root resets.
 
-Install the Continue extension from VS Code's Extensions view. Its declarative
-configuration uses Qwen3.6 27B for Agent mode and Qwen2.5-Coder 1.5B for inline
-completion. For the Qwen-specific agent harness, open a VS Code terminal in the
-project and run:
+The shared local AI module provides Ollama, Qwen Code, and the local web-search
+MCP command. Cline and Continue are configured by optional modules, so either
+can be removed from `configuration.nix` without disabling the local model
+backend.
+
+Install the Cline extension from VS Code's Extensions view. Its declarative
+module provides the local web-search MCP server and global local-AI rules. In
+Cline settings, use:
+
+- Provider: Ollama
+- Base URL: `http://localhost:11434`
+- Model: `qwen3.6:27b`
+- Enable: Use Compact Prompt
+- Open with: `Cline: Open In New Tab` for more room than the sidebar
+
+For lower-friction local use, start by auto-approving project reads and MCP
+servers. Enable file edits or safe commands only after a small test task feels
+good.
+
+For the Qwen-specific agent harness, open a VS Code terminal in the project and
+run:
 
 ```console
 qwen
 ```
 
-Both clients use the local Ollama service without an account or API key. Check
+Local clients use the local Ollama service without an account or API key. Check
 model download status and GPU offloading with:
 
 ```console

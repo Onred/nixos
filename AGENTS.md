@@ -22,6 +22,7 @@ NixOS installation for host `nixos` on an AMD/NVIDIA desktop.
   `/mnt/data` (not managed by Disko)
 - Secure Boot signing keys persisted for convenience; never commit private
   keys to Git
+
 ## Working conventions
 
 - Keep flake inputs pinned in `flake.lock`
@@ -39,12 +40,21 @@ NixOS installation for host `nixos` on an AMD/NVIDIA desktop.
   wait for explicit confirmation
 - Never run Disko destructively without showing the target device and
   receiving explicit confirmation
+- Before destructive disk operations, verify the target disk by `/dev/disk/by-id`,
+  model, serial, and current layout
 - Do not run Nix builds, `nixos-rebuild`, activation, or runtime tests;
   give the user commands and wait for results
+- For boot-critical, filesystem, or impermanence changes, prefer
+  `nixos-rebuild boot` after a successful build
 - Never include branch names in commit messages
 - Use local web search routinely to verify information is current, especially
   for code, APIs, model availability, and documentation
 - Prefer local/free solutions over cloud APIs
+
 ## Verification
 
+Ask the user to run:
 
+```console
+sudo nixos-rebuild build --flake ~/nixos/.#nixos
+```
