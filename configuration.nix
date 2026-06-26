@@ -3,9 +3,9 @@
 {
   imports = [
     ./modules/hardware-configuration.nix # Detected hardware facts
-    ./modules/disk-config.nix # Disko partition and filesystem layout
-    ./modules/extra-disks.nix # Optional additional disks
-    ./modules/impermanence.nix # Ephemeral root and persistent state
+    ./modules/drives/drive-config.nix # Disko partition and filesystem layout
+    ./modules/drives/extra-drives.nix # Optional additional drives
+    ./modules/drives/impermanence.nix # Ephemeral root and persistent state
     ./modules/local-ai.nix # Local coding models and shared web search
     ./modules/local-ai-cline.nix # Optional Cline editor integration
     # ./modules/local-ai-continue.nix # Optional Continue editor integration

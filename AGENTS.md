@@ -18,7 +18,7 @@ NixOS installation for host `nixos` on an AMD/NVIDIA desktop.
   detected hardware facts (no filesystem declarations)
 - Persistent Btrfs subvolumes: `/nix`, `/persist`, `/home`
 - Root subvolume is reset on boot
-- `modules/extra-disks.nix` automounts ext4 volume labeled `data` at
+- `modules/drives/extra-drives.nix` automounts ext4 volume labeled `data` at
   `/mnt/data` (not managed by Disko)
 - Secure Boot signing keys persisted for convenience; never commit private
   keys to Git
