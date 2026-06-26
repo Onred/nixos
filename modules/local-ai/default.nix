@@ -7,7 +7,7 @@ let
         pythonPackages.httpx
         pythonPackages.mcp
       ]);
-      server = ./local-ai-web-search.py;
+      server = ./web-search.py;
     in
     pkgs.writeShellScriptBin "local-web-search" ''
       exec ${python}/bin/python ${server}

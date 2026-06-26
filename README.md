@@ -123,9 +123,8 @@ Ollama downloads the declared models in the background after activation. Models
 are retained under `/var/lib/ollama` across ephemeral-root resets.
 
 The shared local AI module provides Ollama, Qwen Code, and the local web-search
-MCP command. Cline and Continue are configured by optional modules, so either
-can be removed from `configuration.nix` without disabling the local model
-backend.
+MCP command. Cline is configured by an optional module, so it can be removed
+from `configuration.nix` without disabling the local model backend.
 
 Install the Cline extension from VS Code's Extensions view. Its declarative
 module provides the local web-search MCP server and global local-AI rules. In

@@ -6,9 +6,8 @@
     ./modules/drives/drive-config.nix # Disko partition and filesystem layout
     ./modules/drives/extra-drives.nix # Optional additional drives
     ./modules/drives/impermanence.nix # Ephemeral root and persistent state
-    ./modules/local-ai.nix # Local coding models and shared web search
+    ./modules/local-ai # Local coding models and shared web search
     ./modules/local-ai-cline.nix # Optional Cline editor integration
-    # ./modules/local-ai-continue.nix # Optional Continue editor integration
     ./modules/nvidia.nix # NVIDIA graphics driver
     ./modules/packages.nix # System and user packages
     ./modules/sunshine.nix # Sunshine game streaming server
