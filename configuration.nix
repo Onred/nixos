@@ -11,6 +11,7 @@
     # ./modules/local-ai-continue.nix # Optional Continue editor integration
     ./modules/nvidia.nix # NVIDIA graphics driver
     ./modules/packages.nix # System and user packages
+    ./modules/sunshine.nix # Sunshine game streaming server
   ];
 
   # Nix

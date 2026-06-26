@@ -48,6 +48,10 @@ NixOS installation for host `nixos` on an AMD/NVIDIA desktop.
 - Use local web search routinely to verify information is current, especially
   for code, APIs, model availability, and documentation
 - Prefer local/free solutions over cloud APIs
+- In Nix `''...''` heredoc strings, escape shell `$` as `''$` (double single-quote
+  before dollar sign), not `$$`. Use `${nixExpr}` only for intentional Nix interpolation.
+- Prefer `pkgs.writeShellApplication` with `runtimeInputs` over `writeTextFile` or
+  `writeShellScriptBin` for shell scripts — it preserves the shebang and sets $PATH.
 
 ## Verification
 
