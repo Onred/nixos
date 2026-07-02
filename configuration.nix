@@ -12,6 +12,7 @@
     ./modules/packages.nix # System and user packages
     ./modules/sunshine # Sunshine game streaming server
     ./modules/update-check.nix # Update notification service
+    ./modules/update-flake.nix # Flake update and rebuild script
   ];
 
   # Nix
