@@ -2,6 +2,9 @@
 
 let
   outputName = "DP-1";
+  sunshinePackage = pkgs.sunshine.override {
+    cudaSupport = true;
+  };
 
   displayProfiles = {
     tv = [ "2560x1440@120" ];
@@ -48,6 +51,7 @@ in
 {
   services.sunshine = {
     enable = true;
+    package = sunshinePackage;
     autoStart = true;
     openFirewall = true;
     capSysAdmin = true;
@@ -60,7 +64,7 @@ in
       encoder = "nvenc";
 
       nvenc_preset = "p6";
-      nvenc_twopass = false;
+      nvenc_twopass = "disabled";
       nvenc_spatial_aq = true;
       nvenc_latency_over_power = true;
 

@@ -1,28 +1,73 @@
 SAVE_FILE="${XDG_RUNTIME_DIR:-/tmp}/sunshine_saved_mode"
 
+kscreen_outputs() {
+  local outputs
+
+  if ! outputs=$(NO_COLOR=1 kscreen-doctor --outputs 2>&1); then
+    echo "Error: kscreen-doctor --outputs failed while inspecting $OUTPUT_NAME" >&2
+    printf '%s\n' "$outputs" >&2
+    return 1
+  fi
+
+  printf '%s\n' "$outputs" \
+    | awk '{ gsub(/\033\[[0-9;]*[[:alpha:]]/, ""); print }'
+}
+
 modes_for_output() {
-  kscreen-doctor --outputs 2>/dev/null \
-    | awk -v output="$OUTPUT_NAME" '
+  mode_entries_for_output | awk '{ print $2 }'
+}
+
+mode_entries_for_output() {
+  local outputs
+  local modes
+
+  if ! outputs=$(kscreen_outputs); then
+    return 1
+  fi
+
+  modes=$(
+    awk -v output="$OUTPUT_NAME" '
       /^Output: / {
         in_output = ($0 ~ (" " output " "))
         next
       }
       in_output && /Modes:/ {
         for (i = 1; i <= NF; i++) {
-          mode = $i
-          sub(/^[0-9]+:/, "", mode)
+          split($i, parts, ":")
+          mode_id = parts[1]
+          mode = parts[2]
           sub(/[!*].*/, "", mode)
-          print mode
+          print mode_id, mode
         }
       }
-    '
+    ' <<< "$outputs"
+  )
+
+  if [[ -z "$modes" ]]; then
+    echo "Error: no modes found for output $OUTPUT_NAME" >&2
+    echo "Available outputs:" >&2
+    kscreen_outputs >&2
+    return 1
+  fi
+
+  printf '%s\n' "$modes"
 }
 
 current_mode() {
-  kscreen-doctor --outputs 2>/dev/null \
-    | awk -v output="$OUTPUT_NAME" '
+  local outputs
+  local mode
+
+  if ! outputs=$(kscreen_outputs); then
+    return 1
+  fi
+
+  mode=$(
+    awk -v output="$OUTPUT_NAME" '
       /^Output: / {
         in_output = ($0 ~ (" " output " "))
+        next
+      }
+      matched {
         next
       }
       in_output && /Modes:/ {
@@ -32,27 +77,47 @@ current_mode() {
             sub(/^[0-9]+:/, "", mode)
             sub(/[!*].*/, "", mode)
             print mode
-            exit
+            matched = 1
           }
         }
       }
-    '
+    ' <<< "$outputs"
+  )
+
+  if [[ -z "$mode" ]]; then
+    echo "Error: could not detect active mode for output $OUTPUT_NAME" >&2
+    echo "Available outputs:" >&2
+    kscreen_outputs >&2
+    return 1
+  fi
+
+  printf '%s\n' "$mode"
 }
 
 resolve_mode() {
-  modes_for_output \
-    | awk -v requested="$1" '
+  local modes
+
+  if ! modes=$(mode_entries_for_output); then
+    return 1
+  fi
+
+  awk -v requested="$1" '
       BEGIN {
         split(requested, parts, "@")
         requested_resolution = parts[1]
         requested_refresh = parts[2] + 0
       }
+      matched {
+        next
+      }
       {
-        mode = $0
+        mode_id = $1
+        mode = $2
 
         if (mode == requested) {
-          print mode
-          exit
+          print mode_id
+          matched = 1
+          next
         }
 
         split(mode, mode_parts, "@")
@@ -62,21 +127,42 @@ resolve_mode() {
             diff = -diff
           }
           if (diff <= 0.1) {
-            print mode
-            exit
+            print mode_id
+            matched = 1
           }
         }
       }
-    '
+    ' <<< "$modes"
 }
 
 set_mode() {
-  mode=$(resolve_mode "$1")
-  if [[ -z "$mode" ]]; then
+  local mode
+  local output
+
+  if ! mode=$(resolve_mode "$1"); then
     return 1
   fi
 
-  kscreen-doctor "output.$OUTPUT_NAME.mode.$mode"
+  if [[ -z "$mode" ]]; then
+    echo "Warning: requested mode $1 is not available for output $OUTPUT_NAME" >&2
+    echo "Available modes for $OUTPUT_NAME:" >&2
+    modes_for_output >&2
+    return 1
+  fi
+
+  echo "Setting $OUTPUT_NAME to $1 using mode id $mode"
+
+  if ! output=$(kscreen-doctor "output.$OUTPUT_NAME.mode.$mode" 2>&1); then
+    printf '%s\n' "$output" >&2
+    return 1
+  fi
+
+  if [[ "$output" == *"Unable to parse arguments"* ]]; then
+    printf '%s\n' "$output" >&2
+    return 1
+  fi
+
+  printf '%s\n' "$output"
 }
 
 case "${1:-}" in
@@ -88,14 +174,13 @@ case "${1:-}" in
     shift
 
     if [[ ! -f "$SAVE_FILE" ]]; then
-      active_mode=$(current_mode)
-
-      if [[ -n "$active_mode" ]]; then
-        echo "$active_mode" > "$SAVE_FILE"
-      else
-        echo "Warning: could not detect active mode" >&2
+      if ! active_mode=$(current_mode); then
+        echo "Error: could not save the current display mode" >&2
         exit 1
       fi
+
+      echo "$active_mode" > "$SAVE_FILE"
+      echo "Saved current $OUTPUT_NAME mode: $active_mode"
     fi
 
     for mode in "$@"; do
@@ -109,7 +194,7 @@ case "${1:-}" in
     ;;
   stop)
     if [[ -f "$SAVE_FILE" ]]; then
-      saved=$(cat "$SAVE_FILE")
+      saved=$(<"$SAVE_FILE")
       set_mode "$saved"
       rm -f "$SAVE_FILE"
     else

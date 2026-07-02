@@ -1,4 +1,4 @@
-{ pkgs, username, ... }:
+{ pkgs, unstable, username, ... }:
 
 {
   imports = [
@@ -30,6 +30,7 @@
 
   boot.loader.efi.canTouchEfiVariables = true;
   boot.kernelPackages = pkgs.linuxPackages_latest;
+  boot.kernelModules = [ "uinput" ];
 
   # Networking
   networking.hostName = "nixos";
@@ -62,6 +63,10 @@
   # Printing
   services.printing.enable = true;
 
+  services.udev.extraRules = ''
+    KERNEL=="uinput", MODE="0660", GROUP="input", SYMLINK+="uinput"
+  '';
+
   # Users
   users.mutableUsers = false;
   users.users.${username} = {
@@ -69,8 +74,8 @@
     description = "Onred";
     hashedPasswordFile = "/persist/secrets/${username}-password-hash";
     extraGroups = [
+      "input"
       "networkmanager"
-      "uinput"
       "wheel"
     ];
   };
