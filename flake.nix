@@ -3,7 +3,7 @@
 
   inputs = {
     nixpkgs.url = "nixpkgs/nixos-26.05";
-    nixpkgs-unstable.url = "nixpkgs/nixos-unstable";
+    # nixpkgs-unstable.url = "nixpkgs/nixos-unstable";
 
     disko = {
       url = "github:nix-community/disko/latest";
@@ -17,12 +17,12 @@
     };
   };
 
-  outputs = { self, nixpkgs, nixpkgs-unstable, disko, impermanence, ... }:
+  outputs = { self, nixpkgs, /*nixpkgs-unstable,*/ disko, impermanence, ... }:
     let
       system = "x86_64-linux";
       username = "onred";
       pkgs = import nixpkgs { inherit system; config.allowUnfree = true; };
-      unstable = import nixpkgs-unstable { inherit system; config.allowUnfree = true; };
+      # unstable = import nixpkgs-unstable { inherit system; config.allowUnfree = true; };
       installer = import ./lib/installer.nix {
         inherit pkgs username;
         configSource = self;
@@ -38,7 +38,7 @@
 
       nixosConfigurations.nixos = nixpkgs.lib.nixosSystem {
         inherit system;
-        specialArgs = { inherit username unstable; };
+        specialArgs = { inherit username /*unstable*/; };
         modules = [
           disko.nixosModules.disko
           impermanence.nixosModules.impermanence
