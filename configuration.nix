@@ -11,6 +11,7 @@
     ./modules/nvidia.nix # NVIDIA graphics driver
     ./modules/packages.nix # System and user packages
     ./modules/sunshine # Sunshine game streaming server
+    ./modules/update-check.nix # Update notification service
   ];
 
   # Nix
