@@ -17,7 +17,7 @@
         echo "updates found, sending notification"
           DISPLAY=:0 \
           DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus \
-          ${pkgs.libnotify}/bin/notify-send -u normal "NixOS Updates" "nix flake update -- Updates available" \
+          ${pkgs.libnotify}/bin/notify-send -u normal "NixOS Updates" "flake-update -- Updates available" \
           || echo "FAIL: notify-send failed (exit $?)"
       else
         echo "no updates found"

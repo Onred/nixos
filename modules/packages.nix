@@ -28,5 +28,6 @@
     sbctl
     tree
     wget
+    libnotify
   ];
 }
