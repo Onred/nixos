@@ -8,6 +8,7 @@ pkgs.writeShellApplication {
     gawk
     git
     gnugrep
+    gum
     mkpasswd
     nixos-install-tools
     sbctl
@@ -17,7 +18,7 @@ pkgs.writeShellApplication {
 
   text = ''
     usage() {
-      echo "Usage: install-nixos --disk /dev/disk/by-id/DEVICE"
+      echo "Usage: install-nixos [--disk /dev/disk/by-id/DEVICE]"
     }
 
     if [[ ''${1-} == "--help" || ''${1-} == "-h" ]]; then
@@ -25,7 +26,12 @@ pkgs.writeShellApplication {
       exit 0
     fi
 
-    if [[ ''${1-} != "--disk" || $# -ne 2 ]]; then
+    disk=
+    if [[ $# -eq 0 ]]; then
+      disk=
+    elif [[ ''${1-} == "--disk" && $# -eq 2 ]]; then
+      disk=$2
+    else
       usage >&2
       exit 2
     fi
@@ -47,7 +53,82 @@ pkgs.writeShellApplication {
       reset=
     fi
 
-    disk=$2
+    choose_disk() {
+      if [[ ! -t 0 || ! -t 1 ]]; then
+        echo "No disk was specified and interactive selection is unavailable." >&2
+        usage >&2
+        exit 2
+      fi
+
+      candidates=$(mktemp)
+      index=0
+
+      while IFS= read -r disk_path; do
+        best_id=
+
+        for by_id in /dev/disk/by-id/*; do
+          [[ -e $by_id ]] || continue
+          case "$(basename -- "$by_id")" in
+            *-part[0-9]*) continue ;;
+          esac
+
+          if [[ $(readlink -f -- "$by_id") != "$disk_path" ]]; then
+            continue
+          fi
+
+          best_id=$by_id
+          case "$(basename -- "$by_id")" in
+            nvme-*|ata-*|usb-*)
+              break
+              ;;
+          esac
+        done
+
+        if [[ -z $best_id ]]; then
+          continue
+        fi
+
+        size=$(lsblk -dnro SIZE -- "$disk_path")
+        model=$(lsblk -dnro MODEL -- "$disk_path" | awk '{$1=$1; print}')
+        serial=$(lsblk -dnro SERIAL -- "$disk_path" | awk '{$1=$1; print}')
+        tran=$(lsblk -dnro TRAN -- "$disk_path" | awk '{$1=$1; print}')
+
+        printf '%s\t%s\t%s\t%s\t%s\t%s\n' \
+          "$index" "$best_id" "$size" "$tran" "$model" "$serial" >> "$candidates"
+        index=$((index + 1))
+      done < <(lsblk -dnpo PATH,TYPE | awk '$2 == "disk" { print $1 }')
+
+      if [[ ! -s $candidates ]]; then
+        echo "No whole disks with /dev/disk/by-id identifiers were found." >&2
+        exit 1
+      fi
+
+      selection=$(
+        awk -F '\t' '{
+          printf "[%s] %s %s %s %s :: %s\n", $1, $3, $4, $5, $6, $2
+        }' "$candidates" \
+          | gum choose --header "Select the installation target disk"
+      ) || true
+
+      if [[ -z $selection ]]; then
+        echo "No disk selected; nothing was changed." >&2
+        exit 1
+      fi
+
+      selected_index=''${selection%%]*}
+      selected_index=''${selected_index#[}
+      disk=$(awk -F '\t' -v selected="$selected_index" '$1 == selected { print $2 }' "$candidates")
+
+      if [[ -z $disk ]]; then
+        echo "Selected disk could not be resolved." >&2
+        exit 1
+      fi
+    }
+
+    if [[ -z $disk ]]; then
+      choose_disk
+    fi
+
     case "$disk" in
       /dev/disk/by-id/*) ;;
       *)
@@ -106,13 +187,13 @@ pkgs.writeShellApplication {
     chmod -R u+w "$config_dir"
 
     nixos-generate-config --show-hardware-config --no-filesystems \
-      > "$config_dir/modules/hardware-configuration.nix"
+      > "$config_dir/hardware-configuration.nix"
 
     home_config="$workdir/home-config"
     git clone --branch master --single-branch \
       https://github.com/Onred/nixos.git "$home_config"
-    cp "$config_dir/modules/hardware-configuration.nix" \
-      "$home_config/modules/hardware-configuration.nix"
+    cp "$config_dir/hardware-configuration.nix" \
+      "$home_config/hardware-configuration.nix"
 
     (
       umask 077

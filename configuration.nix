@@ -1,13 +1,16 @@
-{ pkgs, username, ... }:
+{ pkgs, unstable, username, ... }:
 
 {
   imports = [
-    ./modules/hardware-configuration.nix # Detected hardware facts
-    ./modules/disk-config.nix # Disko partition and filesystem layout
-    ./modules/extra-disks.nix # Optional additional disks
-    ./modules/impermanence.nix # Ephemeral root and persistent state
-    ./modules/nvidia.nix # NVIDIA graphics driver
+    ./hardware-configuration.nix # Detected hardware facts
+    ./modules/storage # Disko layout, extra drives, and impermanence
+    ./modules/nvidia.nix # NVIDIA driver
+    ./modules/local-ai # Local coding models and shared web search
+    ./modules/local-ai/cline.nix # Optional Cline editor integration
     ./modules/packages.nix # System and user packages
+    ./modules/sunshine # Sunshine game streaming server
+    ./modules/tweaks # Targeted local hardware and software fixes
+    ./modules/virtualisation # VFIO and KVMFR GPU passthrough
   ];
 
   # Nix
@@ -26,7 +29,8 @@
   };
 
   boot.loader.efi.canTouchEfiVariables = true;
-  boot.kernelPackages = pkgs.linuxPackages_latest;
+  boot.kernelPackages = unstable.linuxPackages_latest;
+  boot.kernelModules = [ "uinput" ];
 
   # Networking
   networking.hostName = "nixos";
@@ -59,13 +63,23 @@
   # Printing
   services.printing.enable = true;
 
+  services.udev.extraRules = ''
+    KERNEL=="uinput", MODE="0660", GROUP="input", SYMLINK+="uinput"
+  '';
+
   # Users
   users.mutableUsers = false;
   users.users.${username} = {
     isNormalUser = true;
     description = "Onred";
     hashedPasswordFile = "/persist/secrets/${username}-password-hash";
-    extraGroups = [ "networkmanager" "wheel" ];
+    extraGroups = [
+      "input"
+      "kvm"
+      "libvirtd"
+      "networkmanager"
+      "wheel"
+    ];
   };
 
   # Compatibility
