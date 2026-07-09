@@ -1,5 +1,5 @@
 {
   imports = [
-    ./ollama-qwen.nix
+    ./vfio-kvmfr.nix
   ];
 }

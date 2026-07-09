@@ -10,7 +10,7 @@
       "/var/db/sudo"
       "/var/lib/nixos"
       "/var/lib/cups"
-      "/var/lib/private/ollama"
+      "/var/lib/systemd"
       {
         directory = "/var/lib/bluetooth";
         mode = "0700";
@@ -30,7 +30,6 @@
     ];
     files = [
       "/etc/machine-id"
-      "/var/lib/systemd/random-seed"
     ];
   };
 

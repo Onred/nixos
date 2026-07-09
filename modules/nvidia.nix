@@ -7,5 +7,7 @@
     open = true;
     nvidiaSettings = false;
     powerManagement.enable = true;
+
+    branch = "new_feature";
   };
 }
