@@ -20,13 +20,34 @@
   outputs = { self, nixpkgs, nixpkgs-unstable, disko, impermanence, ... }:
     let
       system = "x86_64-linux";
-      username = "onred";
+      localConfig = import ./config.nix;
+      username = localConfig.user.name;
+      fullName = localConfig.user.fullName;
       pkgs = import nixpkgs { inherit system; config.allowUnfree = true; };
       unstable = import nixpkgs-unstable { inherit system; config.allowUnfree = true; };
+      installTargets = {
+        nixos = {
+          flakeTarget = "nixos";
+          hostDir = "hosts/desktop";
+          hardwareConfig = "hosts/desktop/hardware-configuration.nix";
+        };
+        vm = {
+          flakeTarget = "vm";
+          hostDir = "hosts/vm";
+          hardwareConfig = "hosts/vm/hardware-configuration.nix";
+        };
+      };
       installer = import ./lib/installer.nix {
-        inherit pkgs username;
+        inherit installTargets pkgs username;
         configSource = self;
         diskoPackage = disko.packages.${system}.disko;
+      };
+      mkHost = import ./lib/mk-host.nix {
+        inherit fullName localConfig nixpkgs system unstable username;
+        externalModules = [
+          disko.nixosModules.disko
+          impermanence.nixosModules.impermanence
+        ];
       };
     in
     {
@@ -36,14 +57,16 @@
         meta.description = "Install this NixOS configuration onto an explicitly selected disk";
       };
 
-      nixosConfigurations.nixos = nixpkgs.lib.nixosSystem {
-        inherit system;
-        specialArgs = { inherit username unstable; };
-        modules = [
-          disko.nixosModules.disko
-          impermanence.nixosModules.impermanence
-          ./configuration.nix
-        ];
+      nixosConfigurations = {
+        nixos = mkHost {
+          hostName = localConfig.hosts.nixos.hostName;
+          modules = [ ./hosts/desktop ];
+        };
+
+        vm = mkHost {
+          hostName = localConfig.hosts.vm.hostName;
+          modules = [ ./hosts/vm ];
+        };
       };
     };
 }

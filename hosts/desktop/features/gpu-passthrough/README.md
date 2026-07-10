@@ -1,7 +1,7 @@
-# VFIO helpers
+# GPU Passthrough
 
-This module includes two manual VFCT helpers for AMD iGPU passthrough. They are
-installed as commands when the virtualisation module is imported.
+This host feature contains the desktop-specific AMD iGPU passthrough and
+Looking Glass configuration.
 
 ## `extract-vfct-rom`
 

@@ -1,5 +1,17 @@
-{ configSource, diskoPackage, pkgs, username }:
+{ configSource, diskoPackage, installTargets, pkgs, username }:
 
+let
+  targetRows = pkgs.writeText "install-targets.tsv" (
+    pkgs.lib.concatStringsSep "\n" (
+      pkgs.lib.mapAttrsToList
+        (
+          name: target:
+          "${name}\t${target.flakeTarget}\t${target.hostDir}\t${target.hardwareConfig}"
+        )
+        installTargets
+    )
+  );
+in
 pkgs.writeShellApplication {
   name = "install-nixos";
 
@@ -10,6 +22,7 @@ pkgs.writeShellApplication {
     gnugrep
     gum
     mkpasswd
+    nix
     nixos-install-tools
     sbctl
     util-linux
@@ -47,6 +60,41 @@ pkgs.writeShellApplication {
       yellow=
       reset=
     fi
+
+    choose_install_target() {
+      if [[ ! -t 0 || ! -t 1 ]]; then
+        echo "Interactive install target selection is unavailable." >&2
+        usage >&2
+        exit 2
+      fi
+
+      selection=$(
+        awk -F '\t' '{
+          printf "%s (%s) :: %s\n", $1, $2, $3
+        }' ${targetRows} \
+          | gum choose --header "Select the NixOS install target"
+      ) || true
+
+      if [[ -z $selection ]]; then
+        echo "No install target selected; nothing was changed." >&2
+        exit 1
+      fi
+
+      target_name=''${selection%% *}
+      target_row=$(awk -F '\t' -v selected="$target_name" '$1 == selected { print; exit }' ${targetRows})
+
+      if [[ -z $target_row ]]; then
+        echo "Selected install target could not be resolved." >&2
+        exit 1
+      fi
+
+      IFS=$'\t' read -r install_target target_flake target_host_dir target_hardware_config <<< "$target_row"
+
+      if [[ -z $install_target || -z $target_flake || -z $target_host_dir || -z $target_hardware_config ]]; then
+        echo "Selected install target metadata is incomplete." >&2
+        exit 1
+      fi
+    }
 
     choose_disk() {
       if [[ ! -t 0 || ! -t 1 ]]; then
@@ -96,6 +144,7 @@ pkgs.writeShellApplication {
       fi
     }
 
+    choose_install_target
     choose_disk
 
     if [[ ! -b $disk ]]; then
@@ -117,6 +166,7 @@ pkgs.writeShellApplication {
 
     printf '\n%sWARNING: The following disk will be completely erased:%s\n' \
       "$red" "$reset"
+    echo "Install target: $install_target -> $target_flake ($target_host_dir)"
     lsblk -d -o NAME,PATH,SIZE,MODEL,SERIAL,TRAN -- "$resolved_disk"
     printf '\n%sNo changes have been made yet.%s\n\n' "$yellow" "$reset"
 
@@ -147,14 +197,16 @@ pkgs.writeShellApplication {
     cp -R ${configSource}/. "$config_dir/"
     chmod -R u+w "$config_dir"
 
+    hardware_config_path="$config_dir/$target_hardware_config"
+    mkdir -p "$(dirname "$hardware_config_path")"
     nixos-generate-config --show-hardware-config --no-filesystems \
-      > "$config_dir/hardware-configuration.nix"
+      > "$hardware_config_path"
 
     home_config="$workdir/home-config"
     git clone --branch master --single-branch \
       https://github.com/Onred/nixos.git "$home_config"
-    cp "$config_dir/hardware-configuration.nix" \
-      "$home_config/hardware-configuration.nix"
+    mkdir -p "$home_config/$(dirname "$target_hardware_config")"
+    cp "$hardware_config_path" "$home_config/$target_hardware_config"
 
     (
       umask 077
@@ -174,8 +226,16 @@ pkgs.writeShellApplication {
 
     echo
     echo "Hardware configuration and initial secrets are ready."
+    echo "Checking whether the NixOS configuration builds..."
+    nix build "$config_dir#nixosConfigurations.$target_flake.config.system.build.toplevel" \
+      --no-link \
+      --print-build-logs \
+      --show-trace
+
+    echo
     printf '%sThe selected disk and its current layout will be erased:%s\n' \
       "$red" "$reset"
+    echo "Install target: $install_target -> $target_flake ($target_host_dir)"
     echo "  $disk -> $resolved_disk"
     lsblk -o NAME,PATH,SIZE,TYPE,FSTYPE,LABEL,MOUNTPOINTS,MODEL,SERIAL \
       -- "$resolved_disk"
@@ -189,7 +249,7 @@ pkgs.writeShellApplication {
 
     disko-install \
       --write-efi-boot-entries \
-      --flake "$config_dir#nixos" \
+      --flake "$config_dir#$target_flake" \
       --disk main "$disk" \
       --extra-files "$workdir/${username}-password-hash" /persist/secrets/${username}-password-hash \
       --extra-files "$workdir/sbctl" /var/lib/sbctl \

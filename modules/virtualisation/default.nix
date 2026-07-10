@@ -1,5 +1,0 @@
-{
-  imports = [
-    ./vfio-kvmfr.nix
-  ];
-}

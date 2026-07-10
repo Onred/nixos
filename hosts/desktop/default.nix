@@ -1,0 +1,19 @@
+{
+  imports = [
+    ./hardware-configuration.nix
+    ../../profiles/base.nix
+    ../../profiles/boot.nix
+    ../../profiles/desktop-environment.nix
+    ../../profiles/desktop-apps.nix
+    ../../profiles/development.nix
+    ../../profiles/gaming.nix
+    ../../profiles/virtualisation.nix
+    ./features/gpu-passthrough
+    ./features/sunshine
+    ../../modules/local-ai
+    ../../modules/storage
+    ../../modules/storage/extra-drives.nix
+    ../../modules/nvidia.nix
+    ../../modules/tweaks
+  ];
+}

@@ -51,45 +51,30 @@ in
     '';
   };
 
-  virtualisation.libvirtd = {
-    enable = true;
-    onShutdown = "shutdown";
-    qemu = {
-      swtpm.enable = true;
-      package = pkgs.qemu_kvm;
-      verbatimConfig = ''
-        namespaces = []
-        cgroup_device_acl = [
-          "/dev/null", "/dev/full", "/dev/zero",
-          "/dev/random", "/dev/urandom",
-          "/dev/ptmx", "/dev/userfaultfd",
-          "/dev/kvm", "/dev/vfio/vfio", "/dev/kvmfr0"
-        ]
-      '';
-    };
+  virtualisation.libvirtd.qemu.verbatimConfig = ''
+    namespaces = []
+    cgroup_device_acl = [
+      "/dev/null", "/dev/full", "/dev/zero",
+      "/dev/random", "/dev/urandom",
+      "/dev/ptmx", "/dev/userfaultfd",
+      "/dev/kvm", "/dev/vfio/vfio", "/dev/kvmfr0"
+    ]
+  '';
+
+  users.users.${username} = {
+    packages = with pkgs; [
+      extractVfctRom
+      looking-glass-client
+      patchVfctBdf
+    ];
+    extraGroups = [
+      "kvm"
+    ];
   };
-
-  virtualisation.spiceUSBRedirection.enable = true;
-  programs.virt-manager.enable = true;
-
-  users.users.${username}.packages = with pkgs; [
-    extractVfctRom
-    looking-glass-client
-    patchVfctBdf
-    virt-viewer
-  ];
 
   services.udev.extraRules = ''
     SUBSYSTEM=="kvmfr", KERNEL=="kvmfr0", GROUP="kvm", MODE="0660"
   '';
-
-  environment.persistence."/persist".directories = [
-    "/var/lib/libvirt"
-    {
-      directory = "/var/lib/swtpm-localca";
-      mode = "0700";
-    }
-  ];
 
   systemd.tmpfiles.rules = [
     "d /persist/vfio 0755 root root - -"
@@ -97,5 +82,4 @@ in
   ];
 
   users.users.qemu-libvirtd.extraGroups = [ "kvm" ];
-
 }

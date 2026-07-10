@@ -1,6 +1,7 @@
 # NixOS Configuration
 
-Personal NixOS flake for host `nixos`.
+Personal multi-host NixOS flake. The current desktop remains available as
+`.#nixos`.
 
 ## Notable Choices
 
@@ -9,18 +10,19 @@ Personal NixOS flake for host `nixos`.
 - Limine bootloader with Secure Boot support
 - Latest upstream kernel
 - NVIDIA open kernel modules on the `new_feature` branch
-- Optional modules for Sunshine, VFIO/KVMFR virtualisation, local AI, and
-  targeted local tweaks
+- Desktop-local features for Sunshine and VFIO/KVMFR GPU passthrough
+- Optional profiles/modules for virtualisation, local AI, and targeted local tweaks
 
 ## Customize Before Installing
 
-- Edit imports in `configuration.nix`.
-- Adjust modules under `modules/`.
+- Edit `config.nix` for user identity and per-host names.
+- Edit host imports in `hosts/desktop/default.nix`.
+- Adjust reusable bundles under `profiles/` and feature modules under `modules/`.
 - Review `modules/storage/disko-layout.nix` before installing to a new disk.
 - Remove hardware-specific modules you do not need, such as `modules/nvidia.nix`
   or entries under `modules/tweaks/`.
 
-The installer generates `hardware-configuration.nix` for the target machine.
+The installer generates the selected host's `hardware-configuration.nix`.
 
 ## Install
 
@@ -38,8 +40,8 @@ sudo nix --extra-experimental-features "nix-command flakes" run \
   'path:.#install'
 ```
 
-The installer prompts for a target disk, then shows the selected disk layout
-before the final confirmation.
+The installer prompts for an install target and target disk, then shows the
+selected disk layout before the final confirmation.
 
 After install, enroll Secure Boot keys with `sbctl` before enabling Secure Boot
 in firmware.
