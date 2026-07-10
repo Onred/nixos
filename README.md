@@ -10,17 +10,18 @@ Personal multi-host NixOS flake. The current desktop remains available as
 - Limine bootloader with Secure Boot support
 - Latest upstream kernel
 - NVIDIA open kernel modules on the `new_feature` branch
-- Desktop-local features for Sunshine and VFIO/KVMFR GPU passthrough
-- Optional profiles/modules for virtualisation, local AI, and targeted local tweaks
+- Desktop-local features for Sunshine, local AI, EVO4 audio, and VFIO/KVMFR GPU passthrough
+- Shared modules for boot, desktop, development, gaming, virtualisation, NVIDIA, Disko, and Impermanence
 
 ## Customize Before Installing
 
 - Edit `config.nix` for user identity and per-host names.
 - Edit host imports in `hosts/desktop/default.nix`.
-- Adjust reusable bundles under `profiles/` and feature modules under `modules/`.
-- Review `modules/storage/disko-layout.nix` before installing to a new disk.
-- Remove hardware-specific modules you do not need, such as `modules/nvidia.nix`
-  or entries under `modules/tweaks/`.
+- Adjust shared modules under `modules/` and host-specific features under
+  `hosts/`.
+- Review `modules/disko.nix` before installing to a new disk.
+- Remove hardware-specific imports you do not need, such as `modules/nvidia.nix`
+  or desktop features under `hosts/desktop/features/`.
 
 The installer generates the selected host's `hardware-configuration.nix`.
 

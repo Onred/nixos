@@ -4,12 +4,13 @@
   imports = [
     ./hardware-configuration.nix
     (modulesPath + "/profiles/qemu-guest.nix")
-    ../../profiles/base.nix
-    ../../profiles/boot.nix
-    ../../profiles/desktop-environment.nix
-    ../../profiles/desktop-apps.nix
-    ../../profiles/development.nix
-    ../../modules/storage
+    ../../modules/base.nix
+    ../../modules/boot.nix
+    ../../modules/disko.nix
+    ../../modules/impermanence.nix
+    ../../modules/desktop-environment.nix
+    ../../modules/desktop-apps.nix
+    ../../modules/development.nix
   ];
 
   boot.loader.limine.resolution = lib.mkForce null;

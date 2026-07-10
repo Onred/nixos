@@ -1,19 +1,20 @@
 {
   imports = [
     ./hardware-configuration.nix
-    ../../profiles/base.nix
-    ../../profiles/boot.nix
-    ../../profiles/desktop-environment.nix
-    ../../profiles/desktop-apps.nix
-    ../../profiles/development.nix
-    ../../profiles/gaming.nix
-    ../../profiles/virtualisation.nix
-    ./features/gpu-passthrough
-    ./features/sunshine
-    ../../modules/local-ai
-    ../../modules/storage
-    ../../modules/storage/extra-drives.nix
+    ../../modules/base.nix
+    ../../modules/boot.nix
+    ../../modules/disko.nix
+    ../../modules/impermanence.nix
+    ../../modules/desktop-environment.nix
+    ../../modules/desktop-apps.nix
+    ../../modules/development.nix
+    ../../modules/gaming.nix
+    ../../modules/virtualisation.nix
     ../../modules/nvidia.nix
-    ../../modules/tweaks
+    ./features/audient-evo4.nix
+    ./features/gpu-passthrough
+    ./features/local-ai
+    ./features/sunshine
+    ./secondary-drives.nix
   ];
 }

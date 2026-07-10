@@ -20,10 +20,9 @@ Personal NixOS configuration for host `nixos`.
 ## Layout Notes
 
 - `hardware-configuration.nix` contains generated hardware facts only.
-- `modules/storage/impermanence.nix` owns baseline persistence and root reset.
+- `modules/impermanence.nix` owns baseline persistence and root reset.
 - Feature-specific persistence should live with the feature module.
-- `modules/tweaks/` is for targeted one-off local fixes that should be easy to
-  remove without disabling a whole subsystem.
+- Host-specific features and local fixes live under `hosts/<host>/features/`.
 
 ## Validation
 
