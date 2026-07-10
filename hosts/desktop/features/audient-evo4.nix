@@ -1,7 +1,32 @@
 { pkgs, ... }:
 
 {
-  services.pipewire.wireplumber.extraConfig."50-evo4-stereo-profile" = {
+  services.pipewire.extraConfig.pipewire."50-evo4-stereo-sink" = {
+    "context.modules" = [
+      {
+        name = "libpipewire-module-loopback";
+        args = {
+          "node.description" = "Audient EVO 4";
+          "capture.props" = {
+            "node.name" = "evo4_stereo";
+            "media.class" = "Audio/Sink";
+            "audio.position" = [ "FL" "FR" ];
+            "priority.session" = 2000;
+          };
+          "playback.props" = {
+            "node.name" = "playback.evo4_stereo";
+            "audio.position" = [ "AUX0" "AUX1" ];
+            "target.object" = "alsa_output.usb-Audient_EVO4-00.pro-output-0";
+            "node.dont-reconnect" = true;
+            "stream.dont-remix" = true;
+            "node.passive" = true;
+          };
+        };
+      }
+    ];
+  };
+
+  services.pipewire.wireplumber.extraConfig."50-evo4-pro-audio" = {
     "monitor.alsa.rules" = [
       {
         matches = [
@@ -11,19 +36,13 @@
         ];
         actions = {
           update-props = {
-            "device.profile-set" = "simple-headphones-mic.conf";
-            "device.profile" = "output:analog-stereo+input:analog-stereo";
+            "device.profile" = "pro-audio";
             "device.nick" = "Audient EVO 4";
           };
         };
       }
     ];
   };
-
-  services.udev.extraRules = ''
-    SUBSYSTEM=="sound", KERNEL=="card*", ATTRS{manufacturer}=="Audient", ATTRS{product}=="EVO4", ENV{ACP_PROFILE_SET}="simple-headphones-mic.conf"
-    SUBSYSTEM=="sound", KERNEL=="card*", ATTRS{manufacturer}=="Audient", ATTRS{product}=="EVO 4", ENV{ACP_PROFILE_SET}="simple-headphones-mic.conf"
-  '';
 
   environment.systemPackages = with pkgs; [
     alsa-utils
