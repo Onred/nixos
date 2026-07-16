@@ -1,4 +1,4 @@
-{ pkgs, username, ... }:
+{ pkgs, unstable, username, ... }:
 
 {
   boot.kernelModules = [ "uinput" ];
@@ -6,8 +6,14 @@
   hardware.bluetooth.enable = true;
   hardware.graphics.enable = true;
 
-  services.displayManager.sddm.enable = true;
+  nixpkgs.overlays = [
+    (_final: _prev: {
+      kdePackages = unstable.kdePackages;
+    })
+  ];
+
   services.desktopManager.plasma6.enable = true;
+  services.displayManager.plasma-login-manager.enable = true;
 
   fonts.packages = with pkgs; [
     nerd-fonts.jetbrains-mono
