@@ -5,6 +5,11 @@
     nixpkgs.url = "nixpkgs/nixos-26.05";
     nixpkgs-unstable.url = "nixpkgs/nixos-unstable";
 
+    nixos-update-checker = {
+      url = "github:Onred/nixos-update-checker";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     disko = {
       url = "github:nix-community/disko/latest";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -17,7 +22,7 @@
     };
   };
 
-  outputs = { self, nixpkgs, nixpkgs-unstable, disko, impermanence, ... }:
+  outputs = { self, nixpkgs, nixpkgs-unstable, disko, impermanence, nixos-update-checker, ... }:
     let
       system = "x86_64-linux";
       localConfig = import ./config.nix;
@@ -60,7 +65,10 @@
       nixosConfigurations = {
         nixos = mkHost {
           hostName = localConfig.hosts.nixos.hostName;
-          modules = [ ./hosts/desktop ];
+          modules = [
+            nixos-update-checker.nixosModules.default
+            ./hosts/desktop 
+          ];
         };
 
         vm = mkHost {

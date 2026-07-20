@@ -11,10 +11,12 @@
     ../../modules/gaming.nix
     ../../modules/virtualisation.nix
     ../../modules/nvidia.nix
+    ../../modules/nixos-update-checker.nix
     ./features/audient-evo4.nix
     ./features/gpu-passthrough
     ./features/local-ai
     ./features/sunshine
+    ./features/vpn-vm-network.nix
     ./secondary-drives.nix
   ];
 }

@@ -6,5 +6,6 @@
 
   users.users.${username}.packages = with pkgs; [
     protonplus
+    lutris
   ];
 }

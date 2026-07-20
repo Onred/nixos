@@ -6,11 +6,13 @@
     unstable.codex
     fastfetch
     nodejs
+    neovim
   ];
 
   environment.systemPackages = with pkgs; [
     acpica-tools
     binutils
+    bubblewrap
     git
     jq
     nh
@@ -21,5 +23,6 @@
     tree
     usbutils
     wget
+    vim
   ];
 }
