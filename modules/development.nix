@@ -6,6 +6,7 @@
     unstable.codex
     fastfetch
     nodejs
+    unstable.fetch
     neovim
   ];
 
@@ -14,6 +15,7 @@
     binutils
     bubblewrap
     git
+    gh
     jq
     nh
     pciutils

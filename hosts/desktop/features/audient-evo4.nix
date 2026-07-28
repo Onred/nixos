@@ -17,7 +17,6 @@
             "node.name" = "playback.evo4_stereo";
             "audio.position" = [ "AUX0" "AUX1" ];
             "target.object" = "alsa_output.usb-Audient_EVO4-00.pro-output-0";
-            "node.dont-reconnect" = true;
             "stream.dont-remix" = true;
             "node.passive" = true;
           };

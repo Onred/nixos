@@ -17,6 +17,12 @@
 
   fonts.packages = with pkgs; [
     nerd-fonts.jetbrains-mono
+    inter
+  ];
+
+  fonts.fontconfig.defaultFonts.sansSerif = [
+    "Inter"
+    "Noto Sans"
   ];
 
   security.rtkit.enable = true;
