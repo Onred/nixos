@@ -7,10 +7,10 @@
     hideMounts = true;
     directories = [
       "/var/log"
-      "/var/db/sudo"
       "/var/lib/nixos"
       "/var/lib/cups"
-      "/var/lib/systemd"
+      "/var/lib/systemd/rfkill"
+      "/var/lib/systemd/timers"
       {
         directory = "/var/lib/bluetooth";
         mode = "0700";
@@ -30,7 +30,19 @@
     ];
     files = [
       "/etc/machine-id"
+      "/var/lib/systemd/credential.secret"
+      "/var/lib/systemd/random-seed"
     ];
+  };
+
+  services.journald.extraConfig = ''
+    SystemMaxUse=500M
+    MaxRetentionSec=30day
+  '';
+
+  systemd.coredump.settings.Coredump = {
+    MaxUse = "100M";
+    KeepFree = "1G";
   };
 
   boot.initrd.systemd.services.reset-root =

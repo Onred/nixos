@@ -1,8 +1,7 @@
-{ pkgs, unstable, username, ... }:
+{ pkgs, username, ... }:
 
 {
   programs.firefox.enable = true;
-
   # Firefox 153 corrupts browser chrome on NVIDIA/Wayland.
   environment.sessionVariables.MOZ_ENABLE_WAYLAND = "0";
 
@@ -10,9 +9,8 @@
     alacritty
     discord
     pavucontrol
-    (vscode.fhsWithPackages (packages: [ packages.stdenv.cc.cc ]))
+    vscode
     zed-editor
     libreoffice-qt6
-    # unstable.bitwarden-desktop
   ];
 }

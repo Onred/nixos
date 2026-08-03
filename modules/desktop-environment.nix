@@ -1,16 +1,10 @@
-{ pkgs, unstable, username, ... }:
+{ pkgs, username, ... }:
 
 {
   boot.kernelModules = [ "uinput" ];
 
   hardware.bluetooth.enable = true;
   hardware.graphics.enable = true;
-
-  nixpkgs.overlays = [
-    (_final: _prev: {
-      kdePackages = unstable.kdePackages;
-    })
-  ];
 
   services.desktopManager.plasma6.enable = true;
   services.displayManager.plasma-login-manager.enable = true;
@@ -34,6 +28,11 @@
   };
 
   services.printing.enable = true;
+
+  environment.persistence."/persist".directories = [
+    "/var/lib/AccountsService"
+    "/var/lib/fwupd"
+  ];
 
   services.udev.extraRules = ''
     KERNEL=="uinput", MODE="0660", GROUP="input", SYMLINK+="uinput"

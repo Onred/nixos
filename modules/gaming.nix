@@ -1,4 +1,4 @@
-{ pkgs, unstable, username, ... }:
+{ pkgs, username, ... }:
 
 {
   programs.steam = {
@@ -12,14 +12,12 @@
         DXVK_FRAME_PACE = "low-latency-vrr-240";
       };
     };
-
-    extraPackages = with pkgs; [ kdePackages.breeze ];
   };
 
   users.users.${username}.packages = with pkgs; [
     protonplus
     lutris
-    unstable.faugus-launcher
+    faugus-launcher
     mangohud
   ];
 }
