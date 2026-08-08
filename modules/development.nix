@@ -1,6 +1,7 @@
 { pkgs, unstable, username, ... }:
 
 {
+  programs.direnv.enable = true;
   programs.nix-ld.enable = true;
 
   users.users.${username}.packages = with pkgs; [

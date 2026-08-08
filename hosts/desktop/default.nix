@@ -5,6 +5,7 @@
     ../../modules/boot.nix
     ../../modules/disko.nix
     ../../modules/impermanence.nix
+    ../../modules/storage-maintenance.nix
     ../../modules/desktop-environment.nix
     ../../modules/desktop-apps.nix
     ../../modules/development.nix
@@ -15,6 +16,7 @@
     ./features/audient-evo4.nix
     ./features/gpu-passthrough
     ./features/local-ai
+    ./features/restic-backup.nix
     ./features/sunshine
     ./features/vpn-vm-network.nix
     ./secondary-drives.nix

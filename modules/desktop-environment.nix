@@ -8,6 +8,7 @@
 
   services.desktopManager.plasma6.enable = true;
   services.displayManager.plasma-login-manager.enable = true;
+  programs.kdeconnect.enable = true;
 
   fonts.packages = with pkgs; [
     nerd-fonts.jetbrains-mono
@@ -32,6 +33,12 @@
   environment.persistence."/persist".directories = [
     "/var/lib/AccountsService"
     "/var/lib/fwupd"
+    {
+      directory = "/var/lib/plasmalogin";
+      user = "plasmalogin";
+      group = "plasmalogin";
+      mode = "0750";
+    }
   ];
 
   services.udev.extraRules = ''

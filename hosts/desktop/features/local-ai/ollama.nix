@@ -1,34 +1,18 @@
 { pkgs, username, ... }:
 
 let
-  localWebSearch =
-    let
-      python = pkgs.python3.withPackages (pythonPackages: [
-        pythonPackages.httpx
-        pythonPackages.mcp
-      ]);
-      server = ./web-search.py;
-    in
-    pkgs.writeShellScriptBin "local-web-search" ''
-      exec ${python}/bin/python ${server}
-    '';
-in
-{
-  services.searx = {
-    enable = true;
-    settings = {
-      server = {
-        bind_address = "127.0.0.1";
-        port = 8080;
-        secret_key = "local-only";
-      };
-      search.formats = [
-        "html"
-        "json"
-      ];
-    };
+  openWebUiDesktop = pkgs.makeDesktopItem {
+    name = "open-webui";
+    desktopName = "Open WebUI";
+    genericName = "Local AI Chat";
+    comment = "Chat with local Ollama models";
+    exec = "${pkgs.xdg-utils}/bin/xdg-open http://127.0.0.1:8080";
+    icon = "${pkgs.open-webui}/${pkgs.python3.sitePackages}/open_webui/static/favicon.svg";
+    categories = [ "Network" "Utility" ];
   };
+in
 
+{
   services.ollama = {
     enable = true;
     package = pkgs.ollama-cuda;
@@ -47,14 +31,31 @@ in
     };
   };
 
-  users.users.${username}.packages = [ pkgs.qwen-code ];
+  services.open-webui = {
+    enable = true;
+    host = "127.0.0.1";
+    port = 8080;
+    environment = {
+      ENABLE_OPENAI_API = "False";
+      OLLAMA_BASE_URL = "http://127.0.0.1:11434";
+    };
+  };
 
-  environment.systemPackages = [ localWebSearch ];
+  systemd.services.open-webui = {
+    wants = [ "ollama.service" ];
+    after = [ "ollama.service" ];
+  };
+
+  users.users.${username}.packages = [
+    openWebUiDesktop
+    pkgs.qwen-code
+  ];
 
   environment.sessionVariables.OLLAMA_API_KEY = "ollama";
 
   environment.persistence."/persist".directories = [
     "/var/lib/private/ollama"
+    "/var/lib/private/open-webui"
   ];
 
   environment.etc."local-ai/qwen-settings.json".text = builtins.toJSON {

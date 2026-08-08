@@ -7,10 +7,15 @@
     hideMounts = true;
     directories = [
       "/var/log"
+      "/var/lib/lastlog"
       "/var/lib/nixos"
       "/var/lib/cups"
       "/var/lib/systemd/rfkill"
       "/var/lib/systemd/timers"
+      {
+        directory = "/var/db/sudo/lectured";
+        mode = "0700";
+      }
       {
         directory = "/var/lib/bluetooth";
         mode = "0700";
@@ -30,6 +35,7 @@
     ];
     files = [
       "/etc/machine-id"
+      "/var/lib/logrotate.status"
       "/var/lib/systemd/credential.secret"
       "/var/lib/systemd/random-seed"
     ];
