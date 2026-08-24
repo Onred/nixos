@@ -1,39 +1,76 @@
-{ pkgs, unstable, username, ... }:
+{
+  pkgs,
+  unstable,
+  username,
+  ...
+}:
 
 {
+  programs.direnv.enable = true;
   programs.firefox.enable = true;
-  programs.steam.enable = true;
-  programs.steam.extraPackages = with pkgs; [ kdePackages.breeze ];
+  programs.gamemode.enable = true;
+  programs.nix-ld.enable = true;
+
+  programs.steam = {
+    enable = true;
+
+    package = pkgs.steam.override {
+      extraEnv = {
+        MANGOHUD = "1";
+        PROTON_ENABLE_WAYLAND = "1";
+        PROTON_DXVK_LOWLATENCY = "1";
+        DXVK_FRAME_PACE = "low-latency-vrr-240";
+      };
+    };
+  };
+
+  # Firefox 153 corrupts browser chrome on NVIDIA/Wayland.
+  environment.sessionVariables.MOZ_ENABLE_WAYLAND = "0";
+
+  fonts.packages = with pkgs; [
+    nerd-fonts.jetbrains-mono
+    inter
+  ];
+
+  fonts.fontconfig.defaultFonts.sansSerif = [
+    "Inter"
+    "Noto Sans"
+  ];
 
   users.users.${username}.packages = with pkgs; [
     # Desktop
     alacritty
     discord
-    neovim
+    drawy
+    libreoffice-qt6
+    localsend
     pavucontrol
-    protonplus
-    (vscode.fhsWithPackages (packages: [ packages.stdenv.cc.cc ]))
+    vscode
     zed-editor
 
-    # Command line
+    # Development
     btop
-    unstable.codex
     fastfetch
-    nodejs
+    neovim
+    unstable.codex
+
+    # Gaming
+    faugus-launcher
+    lutris
+    mangohud
+    protonplus
   ];
 
   environment.systemPackages = with pkgs; [
-    acpica-tools
-    binutils
+    gh
     git
     jq
     nh
-    python3
-    sbctl
-    sqlite
-    tree
     pciutils
+    sbctl
+    tree
     usbutils
+    vim
     wget
   ];
 }

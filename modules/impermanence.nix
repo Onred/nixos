@@ -1,16 +1,29 @@
-{ config, pkgs, utils, ... }:
+{
+  config,
+  inputs,
+  pkgs,
+  utils,
+  ...
+}:
 
 {
+  imports = [ inputs.impermanence.nixosModules.impermanence ];
+
   fileSystems."/persist".neededForBoot = true;
 
   environment.persistence."/persist" = {
     hideMounts = true;
     directories = [
       "/var/log"
-      "/var/db/sudo"
+      "/var/lib/lastlog"
       "/var/lib/nixos"
       "/var/lib/cups"
-      "/var/lib/systemd"
+      "/var/lib/systemd/rfkill"
+      "/var/lib/systemd/timers"
+      {
+        directory = "/var/db/sudo/lectured";
+        mode = "0700";
+      }
       {
         directory = "/var/lib/bluetooth";
         mode = "0700";
@@ -30,7 +43,20 @@
     ];
     files = [
       "/etc/machine-id"
+      "/var/lib/logrotate.status"
+      "/var/lib/systemd/credential.secret"
+      "/var/lib/systemd/random-seed"
     ];
+  };
+
+  services.journald.extraConfig = ''
+    SystemMaxUse=500M
+    MaxRetentionSec=30day
+  '';
+
+  systemd.coredump.settings.Coredump = {
+    MaxUse = "100M";
+    KeepFree = "1G";
   };
 
   boot.initrd.systemd.services.reset-root =

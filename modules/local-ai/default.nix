@@ -1,5 +1,6 @@
 {
   imports = [
-    ./ollama-qwen.nix
+    # Enable ./comfyui.nix when the comfyui-nix input is active.
+    ./ollama.nix
   ];
 }

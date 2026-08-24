@@ -21,7 +21,7 @@ let
     text = ''
       OUTPUT_NAME="${outputName}"
     ''
-    + builtins.readFile ./mode-switch.sh;
+    + builtins.readFile ../scripts/sunshine-mode-switch.sh;
   };
 
   steamBigPictureCommand = "${pkgs.steam}/bin/steam steam://open/bigpicture";

@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+"""Patch GPU bus, device, and function values in an ACPI VFCT table."""
+
 import argparse
 import os
 import struct
@@ -7,8 +9,8 @@ import sys
 
 ACPI_HEADER_SIZE = 36
 VFCT_IMAGE_HEADER_SIZE = 28
-DEFAULT_SOURCE = "/persist/vfio/VFCT-host.dat"
-DEFAULT_OUTPUT = "/persist/vfio/VFCT-guest.dat"
+DEFAULT_SOURCE = "/var/lib/vfio/VFCT-host.dat"
+DEFAULT_OUTPUT = "/var/lib/vfio/VFCT-guest.dat"
 
 
 def parse_hex_byte(value):
@@ -153,7 +155,9 @@ def main():
         return 1
 
     for header in matches:
-        struct.pack_into("<III", blob, header["header_offset"], args.bus, args.device, args.function)
+        struct.pack_into(
+            "<III", blob, header["header_offset"], args.bus, args.device, args.function
+        )
 
     fix_acpi_checksum(blob)
 

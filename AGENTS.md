@@ -20,10 +20,15 @@ Personal NixOS configuration for host `nixos`.
 ## Layout Notes
 
 - `hardware-configuration.nix` contains generated hardware facts only.
-- `modules/storage/impermanence.nix` owns baseline persistence and root reset.
+- `configuration.nix` is the single NixOS entrypoint imported by the flake.
+- `modules/default.nix` owns the explicit list of enabled capabilities.
+- `modules/system.nix` owns baseline system, user, and boot configuration.
+- `modules/hardware.nix` owns manually maintained device-specific settings.
+- `modules/packages.nix` owns general applications and package lists.
+- `modules/impermanence.nix` owns baseline persistence and root reset.
 - Feature-specific persistence should live with the feature module.
-- `modules/tweaks/` is for targeted one-off local fixes that should be easy to
-  remove without disabling a whole subsystem.
+- Module helper scripts and their documentation live under `scripts/`.
+- Complex multi-module capabilities may use a directory under `modules/`.
 
 ## Validation
 

@@ -1,6 +1,8 @@
-{ ... }:
+{ inputs, ... }:
 
 {
+  imports = [ inputs.disko.nixosModules.disko ];
+
   disko.devices.disk.main = {
     type = "disk";
 
@@ -26,7 +28,10 @@
           size = "100%";
           content = {
             type = "btrfs";
-            extraArgs = [ "-L" "nixos" ];
+            extraArgs = [
+              "-L"
+              "nixos"
+            ];
             subvolumes = {
               "/root" = {
                 mountpoint = "/";

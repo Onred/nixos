@@ -1,4 +1,10 @@
-{ configSource, diskoPackage, pkgs, username }:
+{
+  configSource,
+  diskoPackage,
+  hostName,
+  pkgs,
+  username,
+}:
 
 pkgs.writeShellApplication {
   name = "install-nixos";
@@ -10,6 +16,7 @@ pkgs.writeShellApplication {
     gnugrep
     gum
     mkpasswd
+    nix
     nixos-install-tools
     sbctl
     util-linux
@@ -117,6 +124,7 @@ pkgs.writeShellApplication {
 
     printf '\n%sWARNING: The following disk will be completely erased:%s\n' \
       "$red" "$reset"
+    echo "NixOS configuration: ${hostName}"
     lsblk -d -o NAME,PATH,SIZE,MODEL,SERIAL,TRAN -- "$resolved_disk"
     printf '\n%sNo changes have been made yet.%s\n\n' "$yellow" "$reset"
 
@@ -147,14 +155,14 @@ pkgs.writeShellApplication {
     cp -R ${configSource}/. "$config_dir/"
     chmod -R u+w "$config_dir"
 
+    hardware_config_path="$config_dir/hardware-configuration.nix"
     nixos-generate-config --show-hardware-config --no-filesystems \
-      > "$config_dir/hardware-configuration.nix"
+      > "$hardware_config_path"
 
     home_config="$workdir/home-config"
     git clone --branch master --single-branch \
       https://github.com/Onred/nixos.git "$home_config"
-    cp "$config_dir/hardware-configuration.nix" \
-      "$home_config/hardware-configuration.nix"
+    cp "$hardware_config_path" "$home_config/hardware-configuration.nix"
 
     (
       umask 077
@@ -174,8 +182,16 @@ pkgs.writeShellApplication {
 
     echo
     echo "Hardware configuration and initial secrets are ready."
+    echo "Checking whether the NixOS configuration builds..."
+    nix build "$config_dir#nixosConfigurations.${hostName}.config.system.build.toplevel" \
+      --no-link \
+      --print-build-logs \
+      --show-trace
+
+    echo
     printf '%sThe selected disk and its current layout will be erased:%s\n' \
       "$red" "$reset"
+    echo "NixOS configuration: ${hostName}"
     echo "  $disk -> $resolved_disk"
     lsblk -o NAME,PATH,SIZE,TYPE,FSTYPE,LABEL,MOUNTPOINTS,MODEL,SERIAL \
       -- "$resolved_disk"
@@ -189,7 +205,7 @@ pkgs.writeShellApplication {
 
     disko-install \
       --write-efi-boot-entries \
-      --flake "$config_dir#nixos" \
+      --flake "$config_dir#${hostName}" \
       --disk main "$disk" \
       --extra-files "$workdir/${username}-password-hash" /persist/secrets/${username}-password-hash \
       --extra-files "$workdir/sbctl" /var/lib/sbctl \

@@ -1,4 +1,9 @@
-{ config, pkgs, username, ... }:
+{
+  config,
+  pkgs,
+  username,
+  ...
+}:
 
 let
   lookingGlassMemoryMB = 128;
@@ -10,14 +15,14 @@ let
     name = "extract-vfct-rom";
     runtimeInputs = [ pkgs.python3 ];
     text = ''
-      exec python3 ${./extract-vfct-rom.py} "$@"
+      exec python3 ${../scripts/extract-vfct-rom.py} "$@"
     '';
   };
   patchVfctBdf = pkgs.writeShellApplication {
     name = "patch-vfct-bdf";
     runtimeInputs = [ pkgs.python3 ];
     text = ''
-      exec python3 ${./patch-vfct-bdf.py} "$@"
+      exec python3 ${../scripts/patch-vfct-bdf.py} "$@"
     '';
   };
 in
@@ -51,51 +56,41 @@ in
     '';
   };
 
-  virtualisation.libvirtd = {
-    enable = true;
-    onShutdown = "shutdown";
-    qemu = {
-      swtpm.enable = true;
-      package = pkgs.qemu_kvm;
-      verbatimConfig = ''
-        namespaces = []
-        cgroup_device_acl = [
-          "/dev/null", "/dev/full", "/dev/zero",
-          "/dev/random", "/dev/urandom",
-          "/dev/ptmx", "/dev/userfaultfd",
-          "/dev/kvm", "/dev/vfio/vfio", "/dev/kvmfr0"
-        ]
-      '';
-    };
+  virtualisation.libvirtd.qemu.verbatimConfig = ''
+    namespaces = []
+    cgroup_device_acl = [
+      "/dev/null", "/dev/full", "/dev/zero",
+      "/dev/random", "/dev/urandom",
+      "/dev/ptmx", "/dev/userfaultfd",
+      "/dev/kvm", "/dev/vfio/vfio", "/dev/kvmfr0"
+    ]
+  '';
+
+  users.users.${username} = {
+    packages = with pkgs; [
+      extractVfctRom
+      looking-glass-client
+      patchVfctBdf
+    ];
+    extraGroups = [
+      "kvm"
+    ];
   };
-
-  virtualisation.spiceUSBRedirection.enable = true;
-  programs.virt-manager.enable = true;
-
-  users.users.${username}.packages = with pkgs; [
-    extractVfctRom
-    looking-glass-client
-    patchVfctBdf
-    virt-viewer
-  ];
 
   services.udev.extraRules = ''
     SUBSYSTEM=="kvmfr", KERNEL=="kvmfr0", GROUP="kvm", MODE="0660"
   '';
 
   environment.persistence."/persist".directories = [
-    "/var/lib/libvirt"
     {
-      directory = "/var/lib/swtpm-localca";
-      mode = "0700";
+      directory = "/var/lib/vfio";
+      mode = "0755";
     }
   ];
 
   systemd.tmpfiles.rules = [
-    "d /persist/vfio 0755 root root - -"
     "z /dev/kvmfr0 0660 root kvm - -"
   ];
 
   users.users.qemu-libvirtd.extraGroups = [ "kvm" ];
-
 }
