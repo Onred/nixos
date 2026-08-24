@@ -1,4 +1,9 @@
-{ config, pkgs, username, ... }:
+{
+  config,
+  pkgs,
+  username,
+  ...
+}:
 
 let
   lookingGlassMemoryMB = 128;
@@ -10,14 +15,14 @@ let
     name = "extract-vfct-rom";
     runtimeInputs = [ pkgs.python3 ];
     text = ''
-      exec python3 ${./extract-vfct-rom.py} "$@"
+      exec python3 ${../scripts/extract-vfct-rom.py} "$@"
     '';
   };
   patchVfctBdf = pkgs.writeShellApplication {
     name = "patch-vfct-bdf";
     runtimeInputs = [ pkgs.python3 ];
     text = ''
-      exec python3 ${./patch-vfct-bdf.py} "$@"
+      exec python3 ${../scripts/patch-vfct-bdf.py} "$@"
     '';
   };
 in
@@ -76,8 +81,14 @@ in
     SUBSYSTEM=="kvmfr", KERNEL=="kvmfr0", GROUP="kvm", MODE="0660"
   '';
 
+  environment.persistence."/persist".directories = [
+    {
+      directory = "/var/lib/vfio";
+      mode = "0755";
+    }
+  ];
+
   systemd.tmpfiles.rules = [
-    "d /persist/vfio 0755 root root - -"
     "z /dev/kvmfr0 0660 root kvm - -"
   ];
 

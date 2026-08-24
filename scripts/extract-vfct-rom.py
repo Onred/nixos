@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+"""Extract an AMD GPU option ROM from an ACPI VFCT table."""
+
 import argparse
 import os
 import struct
@@ -6,7 +8,7 @@ import sys
 
 
 DEFAULT_SOURCE = "/sys/firmware/acpi/tables/VFCT"
-DEFAULT_OUTPUT = "/persist/vfio/amd-igpu-1002-13c0-vfct.rom"
+DEFAULT_OUTPUT = "/var/lib/vfio/amd-igpu-1002-13c0-vfct.rom"
 
 
 def parse_hex_id(value):
@@ -161,7 +163,10 @@ def main():
         return 1
 
     if len(matches) > 1:
-        print(f"found {len(matches)} matching ROMs; using the first match", file=sys.stderr)
+        print(
+            f"found {len(matches)} matching ROMs; using the first match",
+            file=sys.stderr,
+        )
 
     offset, images, rom = matches[0]
     if os.path.exists(args.output) and not args.force:

@@ -22,37 +22,33 @@
     };
   };
 
-  outputs = { self, nixpkgs, nixpkgs-unstable, disko, impermanence, nixos-update-checker, ... }:
+  outputs =
+    inputs@{
+      self,
+      nixpkgs,
+      nixpkgs-unstable,
+      disko,
+      ...
+    }:
     let
+      # Local system settings
       system = "x86_64-linux";
-      localConfig = import ./config.nix;
-      username = localConfig.user.name;
-      fullName = localConfig.user.fullName;
-      pkgs = import nixpkgs { inherit system; config.allowUnfree = true; };
-      unstable = import nixpkgs-unstable { inherit system; config.allowUnfree = true; };
-      installTargets = {
-        nixos = {
-          flakeTarget = "nixos";
-          hostDir = "hosts/desktop";
-          hardwareConfig = "hosts/desktop/hardware-configuration.nix";
-        };
-        vm = {
-          flakeTarget = "vm";
-          hostDir = "hosts/vm";
-          hardwareConfig = "hosts/vm/hardware-configuration.nix";
-        };
+      hostName = "nixos";
+      username = "onred";
+      fullName = "Onred";
+
+      pkgs = import nixpkgs {
+        inherit system;
+        config.allowUnfree = true;
+      };
+      unstable = import nixpkgs-unstable {
+        inherit system;
+        config.allowUnfree = true;
       };
       installer = import ./lib/installer.nix {
-        inherit installTargets pkgs username;
+        inherit hostName pkgs username;
         configSource = self;
         diskoPackage = disko.packages.${system}.disko;
-      };
-      mkHost = import ./lib/mk-host.nix {
-        inherit fullName localConfig nixpkgs system unstable username;
-        externalModules = [
-          disko.nixosModules.disko
-          impermanence.nixosModules.impermanence
-        ];
       };
     in
     {
@@ -62,19 +58,13 @@
         meta.description = "Install this NixOS configuration onto an explicitly selected disk";
       };
 
-      nixosConfigurations = {
-        nixos = mkHost {
-          hostName = localConfig.hosts.nixos.hostName;
-          modules = [
-            nixos-update-checker.nixosModules.default
-            ./hosts/desktop 
-          ];
+      nixosConfigurations.${hostName} = nixpkgs.lib.nixosSystem {
+        inherit system;
+        specialArgs = {
+          inherit inputs unstable;
+          inherit fullName hostName username;
         };
-
-        vm = mkHost {
-          hostName = localConfig.hosts.vm.hostName;
-          modules = [ ./hosts/vm ];
-        };
+        modules = [ ./configuration.nix ];
       };
     };
 }

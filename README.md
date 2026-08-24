@@ -1,7 +1,20 @@
 # NixOS Configuration
 
-Personal multi-host NixOS flake. The current desktop remains available as
-`.#nixos`.
+Personal NixOS flake for the `nixos` system.
+
+## Layout
+
+- `flake.nix` defines editable machine values, inputs, the installer app, and
+  the single NixOS output.
+- `configuration.nix` is the NixOS entrypoint.
+- `hardware-configuration.nix` contains generated hardware facts only.
+- `modules/default.nix` is the explicit list of enabled system modules.
+- `modules/packages.nix` contains general desktop, development, and gaming
+  applications and packages.
+- `scripts/` contains module helper scripts and their usage documentation.
+
+The identity values passed to NixOS modules can also be passed to a future Home
+Manager configuration under `home/`.
 
 ## Notable Choices
 
@@ -10,20 +23,19 @@ Personal multi-host NixOS flake. The current desktop remains available as
 - Limine bootloader with Secure Boot support
 - Latest upstream kernel
 - NVIDIA open kernel modules on the `new_feature` branch
-- Desktop-local features for Sunshine, local AI, EVO4 audio, and VFIO/KVMFR GPU passthrough
-- Shared modules for boot, desktop, development, gaming, virtualisation, NVIDIA, Disko, and Impermanence
+- Modules for Sunshine, local AI, EVO4 audio, and VFIO/KVMFR GPU passthrough
+- Cohesive modules for the system, hardware, KDE Plasma, applications, virtualisation, Disko, and Impermanence
 
 ## Customize Before Installing
 
-- Edit `config.nix` for user identity and per-host names.
-- Edit host imports in `hosts/desktop/default.nix`.
-- Adjust shared modules under `modules/` and host-specific features under
-  `hosts/`.
+- Edit the local system settings near the top of the `flake.nix` output block
+  for the architecture, hostname, username, and full name.
+- Edit imports in `modules/default.nix` to enable or disable capabilities.
+- Adjust configuration under `modules/`.
 - Review `modules/disko.nix` before installing to a new disk.
-- Remove hardware-specific imports you do not need, such as `modules/nvidia.nix`
-  or desktop features under `hosts/desktop/features/`.
+- Review `modules/hardware.nix` for system-specific devices and integrations.
 
-The installer generates the selected host's `hardware-configuration.nix`.
+The installer generates `hardware-configuration.nix` for the target system.
 
 ## Install
 
@@ -41,8 +53,8 @@ sudo nix --extra-experimental-features "nix-command flakes" run \
   'path:.#install'
 ```
 
-The installer prompts for an install target and target disk, then shows the
-selected disk layout before the final confirmation.
+The installer prompts for a target disk, then shows the selected disk layout
+before the final confirmation.
 
 After install, enroll Secure Boot keys with `sbctl` before enabling Secure Boot
 in firmware.

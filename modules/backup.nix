@@ -21,6 +21,7 @@
       "/home/${username}/.local/share/Trash"
       "/persist/var/lib/restic/password"
       "/persist/var/lib/libvirt/images"
+      "/persist/var/lib/comfyui/models"
       "/persist/var/lib/private/ollama"
     ];
 

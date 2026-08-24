@@ -1,7 +1,16 @@
 {
+  hostName,
+  inputs,
+  username,
+  ...
+}:
+
+{
+  imports = [ inputs.nixos-update-checker.nixosModules.default ];
+
   programs.nixos-update-checker = {
     enable = true;
-    repository = "/home/onred/nixos";
+    repository = "/home/${username}/${hostName}";
   };
 
   environment.persistence."/persist".directories = [
