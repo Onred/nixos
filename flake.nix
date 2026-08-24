@@ -5,6 +5,11 @@
     nixpkgs.url = "nixpkgs/nixos-26.05";
     nixpkgs-unstable.url = "nixpkgs/nixos-unstable";
 
+    nixos-update-checker = {
+      url = "github:Onred/nixos-update-checker";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     disko = {
       url = "github:nix-community/disko/latest";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -17,14 +22,31 @@
     };
   };
 
-  outputs = { self, nixpkgs, nixpkgs-unstable, disko, impermanence, ... }:
+  outputs =
+    inputs@{
+      self,
+      nixpkgs,
+      nixpkgs-unstable,
+      disko,
+      ...
+    }:
     let
+      # Local system settings
       system = "x86_64-linux";
+      hostName = "nixos";
       username = "onred";
-      pkgs = import nixpkgs { inherit system; config.allowUnfree = true; };
-      unstable = import nixpkgs-unstable { inherit system; config.allowUnfree = true; };
+      fullName = "Onred";
+
+      pkgs = import nixpkgs {
+        inherit system;
+        config.allowUnfree = true;
+      };
+      unstable = import nixpkgs-unstable {
+        inherit system;
+        config.allowUnfree = true;
+      };
       installer = import ./lib/installer.nix {
-        inherit pkgs username;
+        inherit hostName pkgs username;
         configSource = self;
         diskoPackage = disko.packages.${system}.disko;
       };
@@ -36,14 +58,13 @@
         meta.description = "Install this NixOS configuration onto an explicitly selected disk";
       };
 
-      nixosConfigurations.nixos = nixpkgs.lib.nixosSystem {
+      nixosConfigurations.${hostName} = nixpkgs.lib.nixosSystem {
         inherit system;
-        specialArgs = { inherit username unstable; };
-        modules = [
-          disko.nixosModules.disko
-          impermanence.nixosModules.impermanence
-          ./configuration.nix
-        ];
+        specialArgs = {
+          inherit inputs unstable;
+          inherit fullName hostName username;
+        };
+        modules = [ ./configuration.nix ];
       };
     };
 }

@@ -1,3 +1,4 @@
+# Packaged and configured by modules/sunshine.nix.
 SAVE_FILE="${XDG_RUNTIME_DIR:-/tmp}/sunshine_saved_mode"
 
 kscreen_outputs() {
@@ -196,7 +197,7 @@ case "${1:-}" in
     if [[ -f "$SAVE_FILE" ]]; then
       saved=$(<"$SAVE_FILE")
       set_mode "$saved"
-      rm -f "$SAVE_FILE"
+      rm --force -- "$SAVE_FILE"
     else
       echo "No saved mode found, skipping restore" >&2
     fi

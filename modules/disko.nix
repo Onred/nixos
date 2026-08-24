@@ -1,11 +1,13 @@
-{ ... }:
+{ inputs, ... }:
 
 {
+  imports = [ inputs.disko.nixosModules.disko ];
+
   disko.devices.disk.main = {
     type = "disk";
 
-    # Deliberately invalid: the installer must supply the target explicitly via
-    # `disko-install --disk main /dev/disk/by-id/...`.
+    # Deliberately invalid: the installer will supply the selected target with
+    # `disko-install --disk main ...`.
     device = "/dev/disk/by-id/SET_TARGET_DISK_DURING_INSTALL";
 
     content = {
@@ -26,7 +28,10 @@
           size = "100%";
           content = {
             type = "btrfs";
-            extraArgs = [ "-L" "nixos" ];
+            extraArgs = [
+              "-L"
+              "nixos"
+            ];
             subvolumes = {
               "/root" = {
                 mountpoint = "/";

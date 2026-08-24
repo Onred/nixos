@@ -40,13 +40,33 @@
         "type": "github"
       }
     },
+    "nixos-update-checker": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1785265375,
+        "narHash": "sha256-L/H1SMOuzASty5iXF0QP/8qhJnYNzuvDj5nipsAOMl4=",
+        "owner": "Onred",
+        "repo": "nixos-update-checker",
+        "rev": "9d758ce8fcdc1761dcce92a49927c61b30900e86",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Onred",
+        "repo": "nixos-update-checker",
+        "type": "github"
+      }
+    },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1782691344,
-        "narHash": "sha256-UKS8lypnW5OOIWc3/Qe27/SeO/MsVhiQ0FVUClLZMiA=",
-        "rev": "1f01958ffb5b3545c96d9ef2f4e24c5e5e1eb846",
+        "lastModified": 1787525875,
+        "narHash": "sha256-025An4mAUD6c++o1CFnUhajUJZQJSXRjIxhIGbsPOQ8=",
+        "rev": "a3b98866eecd08edac6e61a3081e69540a35020f",
         "type": "tarball",
-        "url": "https://releases.nixos.org/nixos/26.05/nixos-26.05.3705.1f01958ffb5b/nixexprs.tar.xz"
+        "url": "https://releases.nixos.org/nixos/26.05/nixos-26.05.8334.a3b98866eecd/nixexprs.tar.xz"
       },
       "original": {
         "id": "nixpkgs",
@@ -56,11 +76,11 @@
     },
     "nixpkgs-unstable": {
       "locked": {
-        "lastModified": 1782723713,
-        "narHash": "sha256-T6OhkwGyyGHer1lr4GkbOp//7ii23xLE7HuMmjrdkXI=",
-        "rev": "b5aa0fbd538984f6e3d201be0005b4463d8b09f8",
+        "lastModified": 1787498568,
+        "narHash": "sha256-FoOSoBG7tEvOlGRTpWnVdY506Ner4y7r7UYO3OGgmE8=",
+        "rev": "56c02bc00adcf003215cc4bd996d6efaf4cff188",
         "type": "tarball",
-        "url": "https://releases.nixos.org/nixos/unstable/nixos-26.11pre1024265.b5aa0fbd5389/nixexprs.tar.xz"
+        "url": "https://releases.nixos.org/nixos/unstable/nixos-26.11pre1060451.56c02bc00adc/nixexprs.tar.xz"
       },
       "original": {
         "id": "nixpkgs",
@@ -72,6 +92,7 @@
       "inputs": {
         "disko": "disko",
         "impermanence": "impermanence",
+        "nixos-update-checker": "nixos-update-checker",
         "nixpkgs": "nixpkgs",
         "nixpkgs-unstable": "nixpkgs-unstable"
       }

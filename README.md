@@ -1,107 +1,65 @@
-# NixOS configuration
+# NixOS Configuration
 
-Fresh NixOS desktop installation using flakes, Disko, and impermanence.
+Personal NixOS flake for the `nixos` system.
 
-## Included
+## Layout
 
-- NixOS 26.05 on `x86_64` UEFI systems
-- KDE Plasma 6 with SDDM
+- `flake.nix` defines editable machine values, inputs, the installer app, and
+  the single NixOS output.
+- `configuration.nix` is the NixOS entrypoint.
+- `hardware-configuration.nix` contains generated hardware facts only.
+- `modules/default.nix` is the explicit list of enabled system modules.
+- `modules/packages.nix` contains general desktop, development, and gaming
+  applications and packages.
+- `scripts/` contains module helper scripts and their usage documentation.
+
+The identity values passed to NixOS modules can also be passed to a future Home
+Manager configuration under `home/`.
+
+## Notable Choices
+
+- Disko-managed GPT/Btrfs layout
+- Ephemeral root with explicit impermanence persistence
+- Limine bootloader with Secure Boot support
 - Latest upstream kernel
-- NVIDIA open kernel modules
-- Limine with Secure Boot signing
-- NetworkManager, Bluetooth, PipeWire, and CUPS
-- Steam, Firefox, Neovim, VS Code, Discord, and basic system tools
-- Local coding agents and inline completion backed by Ollama and CUDA
-- Btrfs with ephemeral `/` and persistent `/nix`, `/persist`, and `/home`
-- Automatic hardware detection and password setup during installation
+- NVIDIA open kernel modules on the `new_feature` branch
+- Modules for Sunshine, local AI, EVO4 audio, and VFIO/KVMFR GPU passthrough
+- Cohesive modules for the system, hardware, KDE Plasma, applications, virtualisation, Disko, and Impermanence
 
-NVIDIA is explicitly enabled. For another GPU, clone the repository and remove
-the NVIDIA options from the **Graphics and desktop** section of
-`configuration.nix`. Secure Boot may remain disabled in firmware if it is not
-wanted.
+## Customize Before Installing
 
-## Installation
+- Edit the local system settings near the top of the `flake.nix` output block
+  for the architecture, hostname, username, and full name.
+- Edit imports in `modules/default.nix` to enable or disable capabilities.
+- Adjust configuration under `modules/`.
+- Review `modules/disko.nix` before installing to a new disk.
+- Review `modules/hardware.nix` for system-specific devices and integrations.
 
-Boot the NixOS live environment and connect to the network.
+The installer generates `hardware-configuration.nix` for the target system.
 
-### 1. Identify the target disk
+## Install
 
-List physical disks and their stable identifiers:
-
-```console
-lsblk -d -o NAME,PATH,SIZE,MODEL,SERIAL,TRAN
-ls -l /dev/disk/by-id/
-```
-
-Choose a whole-disk identifier matching the intended model and serial. Do not
-use an entry ending in `-part1`, `-part2`, or another partition suffix.
-
-```console
-DISK='/dev/disk/by-id/REPLACE_WITH_THE_VERIFIED_DISK_ID'
-```
-
-Resolve and inspect it before continuing:
-
-```console
-readlink -f "$DISK"
-lsblk -o NAME,PATH,SIZE,TYPE,FSTYPE,LABEL,MOUNTPOINTS,MODEL,SERIAL \
-  "$(readlink -f "$DISK")"
-```
-
-Confirm that the model, size, serial, existing partitions, and resolved device
-are correct. The selected disk will be completely erased. Do not select the
-installer USB or a disk containing data you want to keep. The original
-machine's identifier is retained only as a footnote.[^this-machine]
-
-### 2. Install
-
-Install the published configuration directly from GitHub:
+From GitHub:
 
 ```console
 sudo nix --extra-experimental-features "nix-command flakes" run \
-  'github:Onred/nixos#install' -- --disk "$DISK"
+  'github:Onred/nixos#install'
 ```
 
-To review or modify the configuration first:
+From a customized checkout:
 
 ```console
-git clone --branch master https://github.com/Onred/nixos.git
-cd nixos
 sudo nix --extra-experimental-features "nix-command flakes" run \
-  'path:.#install' -- --disk "$DISK"
+  'path:.#install'
 ```
 
-The installer verifies the disk again, displays its current layout, requires
-`YES`, prompts twice for the `onred` password, generates hardware configuration,
-partitions the disk, and installs NixOS.
+The installer prompts for a target disk, then shows the selected disk layout
+before the final confirmation.
 
-After installation:
+After install, enroll Secure Boot keys with `sbctl` before enabling Secure Boot
+in firmware.
 
-- `/home/onred/nixos` is the working Git repository.
-- `/etc/nixos` is a recovery snapshot from installation.
-- Secure Boot keys are stored persistently under `/var/lib/sbctl`.
-
-Leave Secure Boot disabled for the first boot. Enroll the generated keys before
-enabling it in firmware. First check the current state:
-
-```console
-sudo sbctl status
-```
-
-The firmware must be in Setup Mode. If it is not, clear or reset the Secure Boot
-keys from the firmware settings, then boot NixOS again. Enroll the current keys
-while retaining the Microsoft certificates needed by some firmware and hardware:
-
-```console
-sudo sbctl enroll-keys --microsoft
-sudo sbctl status
-sudo sbctl verify
-```
-
-After enrollment succeeds and the boot files verify as signed, reboot into the
-firmware settings and enable Secure Boot.
-
-## Rebuilding
+## Apply Config
 
 From `/home/onred/nixos`:
 
@@ -110,50 +68,9 @@ sudo nixos-rebuild build --flake .#nixos
 sudo nixos-rebuild switch --flake .#nixos
 ```
 
-For boot, filesystem, or impermanence changes:
+For bootloader or early-boot changes:
 
 ```console
 sudo nixos-rebuild boot --flake .#nixos
 sudo reboot
 ```
-
-## Local coding models
-
-Ollama downloads the declared models in the background after activation. Models
-are retained under `/var/lib/ollama` across ephemeral-root resets.
-
-The shared local AI module provides Ollama, Qwen Code, and the local web-search
-MCP command. Cline is configured by an optional module, so it can be removed
-from `configuration.nix` without disabling the local model backend.
-
-Install the Cline extension from VS Code's Extensions view. Its declarative
-module provides the local web-search MCP server and global local-AI rules. In
-Cline settings, use:
-
-- Provider: Ollama
-- Base URL: `http://localhost:11434`
-- Model: `qwen3.6:27b`
-- Enable: Use Compact Prompt
-- Open with: `Cline: Open In New Tab` for more room than the sidebar
-
-For lower-friction local use, start by auto-approving project reads and MCP
-servers. Enable file edits or safe commands only after a small test task feels
-good.
-
-For the Qwen-specific agent harness, open a VS Code terminal in the project and
-run:
-
-```console
-qwen
-```
-
-Local clients use the local Ollama service without an account or API key. Check
-model download status and GPU offloading with:
-
-```console
-systemctl status ollama-model-loader
-ollama ps
-```
-
-[^this-machine]: After verifying serial `S6B0NL0W144498J`, the original machine
-    can use: `sudo nix --extra-experimental-features "nix-command flakes" run 'github:Onred/nixos#install' -- --disk '/dev/disk/by-id/nvme-Samsung_SSD_980_PRO_2TB_S6B0NL0W144498J'`
