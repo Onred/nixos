@@ -1,0 +1,60 @@
+name: Archive dev history
+
+on:
+  push:
+    branches:
+      - dev
+
+permissions:
+  contents: write
+
+concurrency:
+  group: archive-dev-history
+  cancel-in-progress: false
+
+jobs:
+  archive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Check out dev
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Attach dev to the archive
+        env:
+          DEV_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          for attempt in 1 2 3; do
+            git fetch --no-tags origin \
+              dev-history:refs/remotes/origin/dev-history
+            history_sha="$(git rev-parse refs/remotes/origin/dev-history)"
+
+            if git merge-base --is-ancestor "$DEV_SHA" "$history_sha"; then
+              exit 0
+            fi
+
+            tree_sha="$(git rev-parse "$DEV_SHA^{tree}")"
+            archive_sha="$({
+              printf 'archive: preserve dev at %s\n\n' "$DEV_SHA"
+              printf 'GitHub-Event: %s\n' "$GITHUB_RUN_ID"
+            } | git commit-tree "$tree_sha" \
+              -p "$history_sha" \
+              -p "$DEV_SHA")"
+
+            if git push origin \
+              "$archive_sha:refs/heads/dev-history"; then
+              exit 0
+            fi
+
+            if [ "$attempt" -eq 3 ]; then
+              exit 1
+            fi
+          done
