@@ -51,3 +51,39 @@ starts streaming, then restores the previous mode afterward. The Sunshine
 module packages this script with its output name and runtime dependencies, so
 it is normally invoked through Sunshine's preparation commands rather than
 directly.
+
+## Steam
+
+The Steam helpers live under `steam/`. `desktop-input.mjs` backs the
+`steam-desktop-input` command packaged by `modules/gaming.nix`. It switches the
+connected Xbox Elite controller's Steam Desktop configuration between its
+current layout and Steam's empty layout:
+
+```console
+steam-desktop-input off
+steam-desktop-input on
+steam-desktop-input toggle
+steam-desktop-input status
+```
+
+The `off` command saves the current layout under
+`$XDG_STATE_HOME/steam-desktop-input` (or `~/.local/state`), and `on` restores
+that exact layout. Steam must be fully restarted once after the configuration
+is first applied so its local UI debugging endpoint becomes available.
+
+That endpoint listens only on localhost but is unauthenticated. Port 8080 is
+reserved for it, so Open WebUI uses port 8081.
+
+`desktop-input-watcher.py` provides a user-session D-Bus service, and
+`desktop-input-focus/` contains the KWin script that reports each active window.
+The watcher identifies Steam games from the window's desktop file or the
+focused process's Steam environment, then runs `steam-desktop-input off` for
+games and `steam-desktop-input on` everywhere else.
+
+The service serializes focus changes, briefly debounces transitions away from
+games, and restores desktop input when it stops. Its decisions are available
+in the user journal:
+
+```console
+journalctl --user -u steam-desktop-input-watcher
+```

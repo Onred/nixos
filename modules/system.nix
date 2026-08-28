@@ -17,8 +17,6 @@
   networking.hostName = hostName;
   networking.networkmanager.enable = true;
 
-  boot.kernelModules = [ "uinput" ];
-
   hardware.bluetooth.enable = true;
   hardware.graphics.enable = true;
 
@@ -31,7 +29,6 @@
     description = fullName;
     hashedPasswordFile = lib.mkDefault "/persist/secrets/${username}-password-hash";
     extraGroups = [
-      "input"
       "networkmanager"
       "wheel"
     ];
@@ -51,10 +48,6 @@
     "/var/lib/AccountsService"
     "/var/lib/fwupd"
   ];
-
-  services.udev.extraRules = ''
-    KERNEL=="uinput", MODE="0660", GROUP="input", SYMLINK+="uinput"
-  '';
 
   boot.loader.limine = {
     enable = true;

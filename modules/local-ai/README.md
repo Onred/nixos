@@ -3,7 +3,7 @@
 These modules provide:
 
 - Ollama with the declared local models
-- Open WebUI on <http://127.0.0.1:8080>
+- Open WebUI on <http://127.0.0.1:8081>
 - ComfyUI with CUDA acceleration on <http://127.0.0.1:8188>
 - Ephemeral ComfyUI Private sessions on <http://127.0.0.1:8189>
 - Qwen Code
