@@ -1,6 +1,7 @@
 {
   pkgs,
   username,
+  unstable,
   ...
 }:
 
@@ -44,8 +45,6 @@ let
 in
 
 {
-  programs.gamemode.enable = true;
-
   # Plasma 6.6 cannot restrict this input-emulation permission by application.
   environment.etc."xdg/kwinrc".text = ''
     [Plugins]
@@ -70,14 +69,20 @@ in
     };
   };
 
-  users.users.${username}.packages = with pkgs; [
-    faugus-launcher
-    lutris
-    mangohud
-    protonplus
-    steamDesktopInput
-    steamDesktopInputFocus
-  ];
+  programs.gamescope.enable = true;
+  programs.gamemode.enable = true;
+
+  users.users.${username} = {
+    extraGroups = [ "gamemode" ];
+    packages = with pkgs; [
+      unstable.faugus-launcher
+      lutris
+      mangohud
+      protonplus
+      steamDesktopInput
+      steamDesktopInputFocus
+    ];
+  };
 
   systemd.user.services.steam-desktop-input-watcher = {
     description = "Follow KWin focus for Steam desktop input";

@@ -2,6 +2,7 @@
   fullName,
   hostName,
   lib,
+  pkgs,
   unstable,
   username,
   ...
@@ -16,6 +17,7 @@
 
   networking.hostName = hostName;
   networking.networkmanager.enable = true;
+  networking.networkmanager.plugins = [ pkgs.networkmanager-openvpn ];
 
   hardware.bluetooth.enable = true;
   hardware.graphics.enable = true;

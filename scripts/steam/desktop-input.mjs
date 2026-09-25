@@ -10,7 +10,6 @@ import {
 import { join } from "node:path";
 
 const desktopAppId = 413080;
-const xboxEliteType = 46;
 const emptyLayout = "local://controller_base/empty.vdf";
 const defaultLayout = "local://controller_base/desktop_xboxone.vdf";
 const port = Number.parseInt(
@@ -153,7 +152,7 @@ async function getControllers(client) {
     }
   }))`;
   const controllers = (await client.evaluate(expression)) ?? [];
-  return controllers.filter((controller) => controller?.type === xboxEliteType);
+  return controllers.filter((controller) => controller !== null);
 }
 
 async function selectLayout(client, controller, url, controllerCount) {
@@ -189,9 +188,7 @@ function saveState(controllers) {
 
 function requireController(controllers) {
   if (controllers.length === 0) {
-    throw new Error(
-      "No connected Xbox Elite controller (Steam controller type 46) was found",
-    );
+    throw new Error("No connected Steam-recognized controller was found");
   }
 }
 
@@ -268,7 +265,8 @@ async function status(client) {
   process.stdout.write(`Saved layout: ${existsSync(stateFile) ? stateFile : "none"}\n`);
   for (const controller of controllers) {
     process.stdout.write(
-      `Controller slot ${controller.index}: ${controller.title || "Xbox Elite"}\n` +
+      `Controller slot ${controller.index}: ` +
+        `${controller.title || `type ${controller.type}`}\n` +
         `  desktop config: ${controller.url || "(none)"}\n` +
         `  outputs: gamepad=${controller.usesGamepad} ` +
         `keyboard=${controller.usesKeyboard} mouse=${controller.usesMouse}\n`,

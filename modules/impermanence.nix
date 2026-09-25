@@ -18,6 +18,7 @@
       "/var/lib/lastlog"
       "/var/lib/nixos"
       "/var/lib/cups"
+      "/var/lib/systemd/coredump"
       "/var/lib/systemd/rfkill"
       "/var/lib/systemd/timers"
       {
@@ -50,12 +51,12 @@
   };
 
   services.journald.extraConfig = ''
-    SystemMaxUse=500M
+    SystemMaxUse=4G
     MaxRetentionSec=30day
   '';
 
   systemd.coredump.settings.Coredump = {
-    MaxUse = "100M";
+    MaxUse = "4G";
     KeepFree = "1G";
   };
 

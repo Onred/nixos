@@ -55,9 +55,9 @@ directly.
 ## Steam
 
 The Steam helpers live under `steam/`. `desktop-input.mjs` backs the
-`steam-desktop-input` command packaged by `modules/gaming.nix`. It switches the
-connected Xbox Elite controller's Steam Desktop configuration between its
-current layout and Steam's empty layout:
+`steam-desktop-input` command packaged by `modules/gaming.nix`. It switches all
+connected Steam-recognized controllers' Desktop configurations between their
+current layouts and Steam's empty layout:
 
 ```console
 steam-desktop-input off
