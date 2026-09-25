@@ -6,7 +6,7 @@ let
     desktopName = "Open WebUI";
     genericName = "Local AI Chat";
     comment = "Chat with local Ollama models";
-    exec = "${pkgs.xdg-utils}/bin/xdg-open http://127.0.0.1:8080";
+    exec = "${pkgs.xdg-utils}/bin/xdg-open http://127.0.0.1:8081";
     icon = "${pkgs.open-webui}/${pkgs.python3.sitePackages}/open_webui/static/favicon.svg";
     categories = [
       "Network"
@@ -37,7 +37,7 @@ in
   services.open-webui = {
     enable = true;
     host = "127.0.0.1";
-    port = 8080;
+    port = 8081;
     environment = {
       ENABLE_OPENAI_API = "False";
       OLLAMA_BASE_URL = "http://127.0.0.1:11434";

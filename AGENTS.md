@@ -30,6 +30,17 @@ Personal NixOS configuration for host `nixos`.
 - Module helper scripts and their documentation live under `scripts/`.
 - Complex multi-module capabilities may use a directory under `modules/`.
 
+## Git Workflow
+
+- Before squash-merging or otherwise rewriting `dev`, record its exact tip with
+  `tip=$(git rev-parse dev)`, push `dev`, and wait for the `Archive dev history`
+  GitHub Actions workflow.
+- Explicitly fetch the remote archive into `origin/dev-history` before
+  checking: `git fetch origin dev-history:refs/remotes/origin/dev-history`.
+  Verify it with `git merge-base --is-ancestor "$tip" origin/dev-history`.
+  Do not rewrite or force-push `dev` unless that check succeeds; report a
+  failed archive run instead.
+
 ## Validation
 
 - Prefer validating with:

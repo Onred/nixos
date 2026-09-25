@@ -7,6 +7,7 @@
     open = true;
     nvidiaSettings = false;
     powerManagement.enable = true;
+    powerManagement.kernelSuspendNotifier = false;
     branch = "new_feature";
   };
 
