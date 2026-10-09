@@ -2,7 +2,8 @@
   description = "Onred's NixOS configuration";
 
   inputs = {
-    nixpkgs.url = "nixpkgs/nixos-26.05";
+    # Return the main input to nixos-26.11 after its package freeze.
+    nixpkgs.url = "nixpkgs/nixos-unstable";
     nixpkgs-unstable.url = "nixpkgs/nixos-unstable";
 
     nixos-update-checker = {

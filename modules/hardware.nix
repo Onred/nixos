@@ -1,4 +1,4 @@
-{ ... }:
+{ config, ... }:
 
 {
   services.xserver.videoDrivers = [ "nvidia" ];
@@ -6,9 +6,7 @@
   hardware.nvidia = {
     open = true;
     nvidiaSettings = false;
-    powerManagement.enable = true;
-    powerManagement.kernelSuspendNotifier = false;
-    branch = "new_feature";
+    branch = "latest";
   };
 
   fileSystems."/mnt/data" = {
@@ -72,6 +70,16 @@
 
   services.pipewire.wireplumber.extraConfig."50-evo4-pro-audio" = {
     "monitor.alsa.rules" = [
+      {
+        matches = [
+          { "node.name" = "~alsa_output.usb-Audient_EVO4.*"; }
+          { "node.name" = "~alsa_input.usb-Audient_EVO4.*"; }
+        ];
+        actions.update-props = {
+          # IRQ scheduling resyncs when EVO4 capture/playback reopen with different periods.
+          "api.alsa.disable-tsched" = false;
+        };
+      }
       {
         matches = [
           {

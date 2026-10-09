@@ -1,104 +1,101 @@
-# Gemma evidence tools for Codex
+# Local evidence tools
 
-`modules/local-ai/local-model-tools.nix` packages this stdio MCP server, runs
-SearXNG at `127.0.0.1:8888`, and registers `local_gemma` in the user's Codex config.
-There are no paid search APIs, cloud model calls, or additional public ports.
-Search queries and page requests do reach the selected public websites.
+This NixOS module provides a command-output wrapper and nine read-only Codex MCP
+tools. The frontier chooses commands, permissions, diagnosis and edits. Local
+`gemma4:12b-it-qat` only selects exact source excerpts; it never executes commands
+or generates replacement evidence.
 
-## Activation
+## Use
 
-Build and activate the NixOS configuration, then restart Codex. A reboot after
-`nixos-rebuild boot --flake .#nixos` also activates it. Merely restarting Codex
-without activating the NixOS changes does not install the service.
-
-`local-gemma-codex-setup.service` merges only `mcp_servers.local_gemma` into
-`/home/onred/.codex/config.toml` and a marked guidance section into the global
-`AGENTS.md`. Other models, providers, MCP entries and instructions are preserved.
-The first originals are backed up beside those files with a
-`.before-local-gemma` suffix, mode 0600. Symlink-managed configuration is rejected
-instead of replaced. Change the module or `codex-guidance.md` to change the
-managed settings; future activations restore this managed section.
-
-After activation, check:
+Use normal shell/rg reads for short output and exact lookups. For verbose commands:
 
 ```console
-systemctl status local-gemma-codex-setup searx ollama-model-loader
-codex mcp list
+local-run-report --cwd /absolute/project --timeout 120 -- COMMAND ARG...
+local-run-report --cwd /absolute/project --report results.xml -- pytest --junitxml=results.xml
 ```
 
-In a new Codex session, `/mcp` should list `local_gemma`. Ask it to search for a
-public technical topic, extract evidence from one result, and inspect a local
-project file. Verify citations, source excerpts, coverage and GPU usage. The
-model loader must finish downloading Gemma before evidence selection works.
-Live inference, search-engine availability, browser access, and Codex's routing
-decisions require this post-activation check; an offline build cannot prove them.
+The runner returns status plus small output, diagnostic context, or recognized
+validation results **in one response**. The artifact ID is `process.id`. Inspect
+again only when the returned evidence is insufficient. Use `--facts-only` when you
+already intend to call `filter_log` or `compare_reports`, avoiding duplicate output.
+Shell syntax requires an explicitly chosen shell (`-- bash -c '...'`), through the
+normal approval path. Interactive commands should use the normal terminal.
 
-## Tools and limits
-
-| Tool | Behavior |
+| Tool / source file in `runtime/` | When useful |
 | --- | --- |
-| `search_web(query, fresh=false)` | Up to five SearXNG links/snippets; no inference |
-| `read_web(url, question, fresh=false)` | Retrieve a page, then select exact passages using Gemma |
-| `extract_evidence(paths, question)` | Select exact passages from 1–5 explicit UTF-8 project files |
+| `run_report.py` (`local-run-report`) | Capture verbose command output and immediately summarize it |
+| `inspect_run.py` | Recover status, error context and tails from an existing run |
+| `validation_report.py` | Test/lint counts and actual failure details |
+| `filter_log.py` | Repeated logs, literal filtering, focused evidence selection |
+| `search_repository.py` | Many project matches; optional focused question |
+| `compare_reports.py` | Before/after outcomes and diagnostic occurrence counts |
+| `read_artifact.py` | Omitted lines or bytes without rerunning a command |
+| `search_web.py` | Public discovery through SearXNG and Gemma |
+| `read_web.py` | Focused passages from a public HTML/text page |
+| `extract_evidence.py` | Focused passages from 1–5 explicit project files |
 
-Only `gemma4:12b-it-qat` is used. It runs at 16K context, with thinking disabled
-and a small output budget because it only selects passage IDs. Python resolves
-those IDs to original text; it does not trust model-generated quotations. The
-returned lines are literal file lines or lines in the extracted web-page text.
-This validates the quotes, not the relevance or completeness of the selection.
+Small documents/results bypass inference. Larger candidate sets reserve space for
+errors, different sources and distributed source locations as well as lexical
+matches. Model selection remains incomplete. Log/repository tools retain a small
+number of high-priority diagnostics independently of Gemma. Coverage, omitted
+counts and truncation flags describe what was left out.
 
-The server first ranks four-line blocks against the question, then supplies at
-most 30 blocks / 11 KB plus small metadata to Gemma. It returns at most four
-excerpts totaling 4 KB. Coverage reports excluded blocks and oversized lines.
-Ask focused questions; a missing finding is not evidence that a problem does
-not exist. Files larger than 512 KB are rejected, not silently truncated.
+Log grouping and comparisons ignore leading ISO timestamps and ANSI formatting;
+other values are preserved. Grouped excerpts retain original text and first/last
+line references. Validation supports JUnit, pytest-json-report, Ruff JSON, and
+standard pytest/unittest console summaries. Unknown formats remain unknown;
+zero tests and all-skipped are distinct outcomes. Explicit report snapshots can
+be stale, so their outcomes remain provisional until provenance is checked.
 
-Allowed local roots are `/home/onred/nixos` and `/home/onred/Projects`, configured
-in the module's MCP arguments. Resolved paths outside them and common credential
-paths are rejected. The process runs as the user, not in Codex's shell sandbox;
-the allowlist is intentionally narrower than the home directory. Do not send
-credentials in otherwise allowed source files. Source content is untrusted data.
+`read_artifact` accepts `contains`, `start_line`, and `line_count`. Long excerpts
+include byte offsets: use `byte_offset=next_byte` to recover the remainder.
+Repository matches retain full text in the `matches` artifact stream; response
+paths are relative to the returned `root`. Document excerpts can include
+`start_column` for long source lines. Do not treat missing selections as absence.
 
-Web fetches accept public HTTP(S) URLs on standard ports, check DNS destinations
-and redirects, and reject private/reserved addresses. These are application-level
-checks, not a hardened network sandbox against hostile DNS rebinding. Requests
-are bounded to 2 MB for direct HTTP; rendered HTML is checked after rendering.
-Only HTML and plain text are supported; PDF and other document types fail explicitly.
+## Limits and storage
 
-HTTP retrieval comes first. An empty JavaScript page, an access-challenge page,
-or HTTP 403 gets at most one isolated Chromium attempt. The browser uses no
-personal profile, blocks downloads, service workers, non-GET/HEAD requests and
-unneeded media, and limits subrequests. HTTP 401/429 and unresolved challenges
-return errors. It does not solve CAPTCHAs, sign in, or bypass paywalls.
+Commands default to 120 seconds and 32 MiB combined output. A timeout/output cap
+kills the command's process group and reports incomplete capture. The wrapper
+preserves child exit codes; timeout/cap/capture errors use 124/125/126, with JSON
+fields distinguishing them from child codes. Deliberately detached children are
+outside its process group; use this for finite commands, not starting services.
 
-Search/page cache lifetimes are five/fifteen minutes. `fresh=true` bypasses them.
-The private cache in `~/.cache/local-gemma` retains at most 100 web entries, with
-entries older than a day removed during writes. Local file text and Gemma prompts
-are not cached. Cross-process locks serialize web retrieval and Gemma inference;
-busy calls fail promptly. A different loaded Ollama model is not evicted by the
-tool (other clients can still race independently). Gemma expires after two idle
-minutes. Active generation can still affect gaming performance.
+Private run artifacts live in `~/.cache/local-gemma/artifacts` (or under
+`XDG_CACHE_HOME`). They persist until their run-ID directories are removed. Avoid
+capturing secrets. Inspection scans at most 8 MiB per stream; artifact paging can
+read beyond that window. Runner and MCP must share the same cache directory.
+Repository search uses fixed rg options, no user rg config, no symlink following,
+and excludes ignored/hidden files and common credential paths. Allowed project
+roots are configured in the Nix module. These are read restrictions, not an OS
+sandbox for the MCP process.
 
-## Usage policy and verification
+Search retrieval stays entirely in SearXNG; there is no paid or host-search
+fallback. Use a few distinctive terms and `domains=["example.com"]` when needed.
+Check degraded/failed engines and fetch pages before citing search snippets.
+`fresh=true` bypasses five-minute search or fifteen-minute page caches. Challenges
+and upstream failures are reported, not interpreted as no matching sources.
+The module backports the pinned upstream Google CSE web adapter. Public search
+providers can still rate-limit or change behavior.
 
-`codex-guidance.md` teaches Codex to use these tools for large unread inputs,
-prefer deterministic search for small tasks, keep final judgment in the frontier
-model, and stop after one failed local attempt. They are not coding subagents.
-Automatic tool choice is model behavior guided by these instructions, not a
-guarantee that every request will use Gemma. Specialist documentation tools and
-higher-priority instructions still take precedence.
+Web fetches check public destinations and redirects, limit HTTP retrieval to
+2 MB, and permit one isolated Chromium fallback for eligible page failures.
+They do not solve CAPTCHAs or sign in. Only HTML/text is supported. Busy inference
+fails promptly; another loaded Ollama model is never evicted. Web cache writes
+retain at most 100 entries for a day. These controls do not prevent hostile DNS
+rebinding or isolate other GPU clients.
 
-`test_model_tools.py` uses temporary files and mocked HTTP/Ollama responses to
-check path restrictions, exact references, bounds, cache eviction, request
-serialization, redirect checks, browser fallback policy and idempotent Codex
-registration. It never calls a live model or website. Run it using the module's
-Python environment with `python -B -m unittest discover -s scripts/local-ai -v`.
+## Activation and layout
 
-Before extending delegation, compare representative tasks with and without the
-tools. Count all frontier input/output and repair work, missed evidence, and wall
-time. `local_usage` reports local inference tokens; it does not measure frontier
-subscription savings.
+Build/apply the NixOS configuration and restart Codex. The registration service
+merges only `mcp_servers.local_gemma` and its marked guidance block, preserving
+other settings and backing up the first originals. Future activation restores
+managed settings from this directory. The user-level runner, when registered
+before a system switch, is at
+`~/.local/state/local-gemma/runner/bin/local-run-report`.
 
-To disable the integration, remove the module import and apply the configuration,
-then remove `mcp_servers.local_gemma` and the marked guidance block from Codex.
-Do not restore whole backup files over newer unrelated edits.
+`runtime/` contains the installed code, with one file per public tool and explicit
+shared helpers. `server.py` registers the MCP tools. `register_codex.py` and
+`codex-guidance.md` manage integration. Development tests and checks are tucked
+under `.development/` and are **not included in the runtime package**. Detailed
+benchmark outputs are kept outside the repository in the user's local state.

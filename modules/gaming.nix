@@ -1,7 +1,6 @@
 {
   pkgs,
   username,
-  unstable,
   ...
 }:
 
@@ -58,13 +57,11 @@ in
 
   programs.steam = {
     enable = true;
-
+    remotePlay.openFirewall = true;
     package = pkgs.steam.override {
+      extraArgs = "-pipewire";
       extraEnv = {
-        MANGOHUD = "1";
         PROTON_ENABLE_WAYLAND = "1";
-        PROTON_DXVK_LOWLATENCY = "1";
-        DXVK_FRAME_PACE = "low-latency-vrr-240";
       };
     };
   };
@@ -75,7 +72,7 @@ in
   users.users.${username} = {
     extraGroups = [ "gamemode" ];
     packages = with pkgs; [
-      unstable.faugus-launcher
+      faugus-launcher
       lutris
       mangohud
       protonplus

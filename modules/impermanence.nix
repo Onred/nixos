@@ -50,10 +50,10 @@
     ];
   };
 
-  services.journald.extraConfig = ''
-    SystemMaxUse=4G
-    MaxRetentionSec=30day
-  '';
+  services.journald.settings.Journal = {
+    SystemMaxUse = "4G";
+    MaxRetentionSec = "30day";
+  };
 
   systemd.coredump.settings.Coredump = {
     MaxUse = "4G";

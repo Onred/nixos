@@ -59,6 +59,7 @@ in
     host = "127.0.0.1";
     port = 8081;
     environment = {
+      WEBUI_AUTH = "False";
       ENABLE_OPENAI_API = "False";
       OLLAMA_BASE_URL = "http://127.0.0.1:11434";
       DEFAULT_MODELS = "gemma4:12b-it-qat";

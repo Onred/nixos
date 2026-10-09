@@ -3,7 +3,6 @@
   hostName,
   lib,
   pkgs,
-  unstable,
   username,
   ...
 }:
@@ -51,6 +50,8 @@
     "/var/lib/fwupd"
   ];
 
+  boot.kernelPackages = pkgs.linuxPackages_latest;
+
   boot.loader.limine = {
     enable = true;
     secureBoot.enable = true;
@@ -62,7 +63,5 @@
   };
 
   boot.loader.efi.canTouchEfiVariables = true;
-  boot.kernelPackages = unstable.linuxPackages_latest;
-
-  system.stateVersion = "26.05";
+  system.stateVersion = "26.11";
 }
