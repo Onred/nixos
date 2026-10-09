@@ -7,6 +7,24 @@
 }:
 
 let
+  # Backport the web-only upstream adapter without changing the pinned nixpkgs.
+  googleCseEngine = pkgs.fetchurl {
+    url = "https://raw.githubusercontent.com/searxng/searxng/1cdf01a71916e67352eb7e6d60ddfdeb62f5f1a2/searx/engines/google_cse.py";
+    hash = "sha256-/6G1Hj7VsP8HvCfldOGV+sx7PtFF4fCEgceoZxCDdYo=";
+  };
+  searchPackage = pkgs.searxng.overrideAttrs (old: {
+    postPatch = (old.postPatch or "") + ''
+      cp ${googleCseEngine} searx/engines/google_cse.py
+      ${pkgs.python3.interpreter} - <<'PYTHON'
+      import json
+      from pathlib import Path
+      path = Path("searx/data/engine_traits.json")
+      traits = json.loads(path.read_text())
+      traits["google cse"] = traits["google"]
+      path.write_text(json.dumps(traits))
+      PYTHON
+    '';
+  });
   python = pkgs.python3.withPackages (p: [
     p.httpx
     p.mcp
@@ -16,10 +34,17 @@ let
   ]);
   localModelTools = pkgs.writeShellApplication {
     name = "local-model-tools";
-    runtimeInputs = [ python ];
+    runtimeInputs = [ python pkgs.ripgrep ];
     text = ''
       export LOCAL_GEMMA_BROWSER=${pkgs.chromium}/bin/chromium
-      exec python ${../../scripts/local-ai/model_tools.py} "''$@"
+      exec python ${../../scripts/local-ai/runtime}/server.py "''$@"
+    '';
+  };
+  runReport = pkgs.writeShellApplication {
+    name = "local-run-report";
+    runtimeInputs = [ python ];
+    text = ''
+      exec python ${../../scripts/local-ai/runtime}/run_report.py "''$@"
     '';
   };
   codexConfig = (pkgs.formats.toml { }).generate "local-gemma-codex.toml" {
@@ -37,30 +62,42 @@ let
         "search_web"
         "read_web"
         "extract_evidence"
+        "inspect_run"
+        "validation_report"
+        "filter_log"
+        "search_repository"
+        "compare_reports"
+        "read_artifact"
       ];
     };
   };
 in
 {
-  environment.systemPackages = [ localModelTools ];
+  environment.systemPackages = [ localModelTools runReport ];
 
   services.searx = {
     enable = true;
+    package = searchPackage;
     settings = {
       use_default_settings.engines.keep_only = [
-        "duckduckgo"
-        "bing"
-        "brave"
+        "mwmbl"
         "wikipedia"
       ];
       general.debug = false;
       engines = [
         {
-          name = "bing";
+          name = "google cse";
+          engine = "google_cse";
+          shortcut = "gc";
           disabled = false;
         }
         {
+          name = "mwmbl";
+          disabled = true;
+        }
+        {
           name = "wikipedia";
+          disabled = true;
           display_type = [ "list" ];
         }
       ];
