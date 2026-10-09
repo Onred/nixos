@@ -47,11 +47,12 @@ Personal NixOS configuration for host `nixos`.
 
 ## Git Workflow
 
-- Finish requested configuration changes with this full workflow unless the
-  user explicitly asks to leave the work uncommitted. Requests to commit,
-  checkpoint, sync branches, squash, or prepare for the next task also mean
-  this full workflow. The user authorizes committing, pushing, archiving,
-  squash-merging into `master`, and realigning `dev`; do not ask again.
+- **`sync git`** is the user's short trigger for this full workflow: checkpoint
+  all current configuration work, push `dev`, use the GitHub Action to preserve
+  its history, squash into `master`, push `master`, and realign `dev`.
+  Equivalent requests to commit, checkpoint, sync branches, squash, or prepare
+  the repository for the next task also mean this workflow. This is standing
+  authorization for its Git operations; do not ask for confirmation again.
 - Work on `dev`. Review the worktree before staging; commit the requested
   changes and preserve unrelated work. When asked to checkpoint all current
   configuration work, include all relevant tracked and untracked files.
