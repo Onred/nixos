@@ -62,6 +62,10 @@ Personal NixOS configuration for host `nixos`.
   combined result and include a body when needed to explain scope or validation.
 - Fetch the remote branch tips before updating them. Do not overwrite remote
   changes or rewrite `master`.
+- Git fetches and pushes are authenticated through SSH using the existing
+  `origin` remote. Do not require `gh auth login` or switch to HTTPS for Git
+  operations. GitHub CLI/API authentication is separate; for this public
+  repository, workflow status can be checked through the unauthenticated API.
 - Keep `Archive dev history` at `.github/workflows/archive-dev-history.yml`;
   GitHub Actions does not discover workflow files in a root `workflows/` folder.
 - Before squash-merging or otherwise rewriting `dev`, record its exact tip with
