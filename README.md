@@ -21,10 +21,27 @@ Manager configuration under `home/`.
 - Disko-managed GPT/Btrfs layout
 - Ephemeral root with explicit impermanence persistence
 - Limine bootloader with Secure Boot support
-- Latest upstream kernel
-- NVIDIA open kernel modules on the `new_feature` branch
+- Latest stable kernel from the main nixpkgs input
+- NVIDIA open kernel modules on the `latest` branch
 - Modules for Sunshine, local AI, EVO4 audio, and VFIO/KVMFR GPU passthrough
 - Cohesive modules for the system, hardware, KDE Plasma, applications, virtualisation, Disko, and Impermanence
+
+## Package Channels
+
+The main `nixpkgs` input temporarily uses `nixos-unstable` ahead of 26.11.
+Both nixpkgs inputs currently lock the same revision. After the 26.11 package
+freeze, change only `nixpkgs.url` to `nixpkgs/nixos-26.11` and run
+`nix flake update nixpkgs`.
+
+Codex uses `nixpkgs-unstable` because access to new models can require a newer
+client. Update it independently with `nix flake update nixpkgs-unstable`.
+
+The kernel uses `pkgs.linuxPackages_latest` from the main package set. NVIDIA,
+CUDA, local AI applications, and Faugus Launcher also use the main package set
+and will follow it onto 26.11.
+Add another unstable override only if the stable version stops working with
+a required external service or model. Watch Qwen Code for provider compatibility
+changes; new features alone are not a reason to switch channels.
 
 ## Customize Before Installing
 

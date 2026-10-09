@@ -6,6 +6,7 @@
     ./hardware.nix
     ./kde-plasma.nix
     ./packages.nix
+    ./gaming.nix
     ./virtualisation.nix
     ./gpu-passthrough.nix
     ./local-ai

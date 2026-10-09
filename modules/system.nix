@@ -2,7 +2,7 @@
   fullName,
   hostName,
   lib,
-  unstable,
+  pkgs,
   username,
   ...
 }:
@@ -16,8 +16,7 @@
 
   networking.hostName = hostName;
   networking.networkmanager.enable = true;
-
-  boot.kernelModules = [ "uinput" ];
+  networking.networkmanager.plugins = [ pkgs.networkmanager-openvpn ];
 
   hardware.bluetooth.enable = true;
   hardware.graphics.enable = true;
@@ -31,7 +30,6 @@
     description = fullName;
     hashedPasswordFile = lib.mkDefault "/persist/secrets/${username}-password-hash";
     extraGroups = [
-      "input"
       "networkmanager"
       "wheel"
     ];
@@ -52,9 +50,7 @@
     "/var/lib/fwupd"
   ];
 
-  services.udev.extraRules = ''
-    KERNEL=="uinput", MODE="0660", GROUP="input", SYMLINK+="uinput"
-  '';
+  boot.kernelPackages = pkgs.linuxPackages_latest;
 
   boot.loader.limine = {
     enable = true;
@@ -67,7 +63,5 @@
   };
 
   boot.loader.efi.canTouchEfiVariables = true;
-  boot.kernelPackages = unstable.linuxPackages_latest;
-
-  system.stateVersion = "26.05";
+  system.stateVersion = "26.11";
 }
