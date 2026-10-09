@@ -56,6 +56,10 @@ Personal NixOS configuration for host `nixos`.
 - Work on `dev`. Review the worktree before staging; commit the requested
   changes and preserve unrelated work. When asked to checkpoint all current
   configuration work, include all relevant tracked and untracked files.
+- Use clear, specific commit messages that explain the change and its purpose.
+  Split independent changes into meaningful commits when useful; keep related
+  changes together. The final `master` squash message should describe the
+  combined result and include a body when needed to explain scope or validation.
 - Fetch the remote branch tips before updating them. Do not overwrite remote
   changes or rewrite `master`.
 - Keep `Archive dev history` at `.github/workflows/archive-dev-history.yml`;
