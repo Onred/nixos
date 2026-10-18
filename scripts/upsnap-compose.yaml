@@ -1,0 +1,9 @@
+services:
+  upsnap:
+    image: ghcr.io/seriousm4x/upsnap:5
+    network_mode: host
+    restart: unless-stopped
+    cap_drop:
+      - ALL
+    volumes:
+      - ./data:/app/pb_data

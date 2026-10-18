@@ -1,6 +1,8 @@
 { config, ... }:
 
 {
+  networking.networkmanager.settings.connection."ethernet.wake-on-lan" = "magic";
+
   services.xserver.videoDrivers = [ "nvidia" ];
 
   hardware.nvidia = {

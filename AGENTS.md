@@ -24,7 +24,15 @@ Personal NixOS configuration for host `nixos`.
 - Keep changes small, direct, and aligned with the existing module structure.
 - Prefer NixOS/module defaults; add options only for explicit requirements,
   necessary hardware facts, or required integrations.
+- Prefer packaged solutions and supported integrations over custom scripts
+  when they meet the requirements and reduce ongoing maintenance.
+- Remote access should require one-time setup on family devices, connect
+  automatically, and preserve their ordinary internet access. Treat VPN
+  connectivity and waking a sleeping PC as separate requirements.
 - Keep comments sparse; explain non-obvious constraints, not ordinary settings.
+- Never add temporary fixes, troubleshooting workarounds, or one-time migration
+  steps to README files. Keep READMEs focused on the maintained configuration
+  and normal usage; provide temporary instructions in the conversation.
 - In Nix `''...''` strings, escape shell `$` as `''$`. Use `${nixExpr}` only
   for intentional Nix interpolation.
 - Prefer `pkgs.writeShellApplication` with `runtimeInputs` for shell tools.

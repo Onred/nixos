@@ -3,6 +3,46 @@
 These scripts support configuration modules but live together so their purpose
 and direct usage are easy to find.
 
+## Strata
+
+[strata.md](strata.md) documents the independent Strata module, first-start
+model preparation, local chat/API access, and starting and stopping inference.
+
+## Pi wake relay
+
+`relay-setup.sh` provisions the fresh 64-bit Trixie Pi with OS updates,
+Tailscale's official APT repository, Debian's Docker/Compose packages, IPv4
+forwarding, and UpSnap. Copy it and `upsnap-compose.yaml` into the same directory
+on the Pi, then run `sudo bash relay-setup.sh`. It does not sign in to Tailscale.
+Authenticate separately with:
+
+```console
+sudo tailscale up --advertise-routes=10.44.0.0/16
+```
+
+Approve that subnet route in Tailscale's Machines page and disable key expiry
+for the always-on relay. Keep the default subnet-router SNAT and no exit node.
+
+`upsnap-compose.yaml` runs the packaged UpSnap wake interface on the always-on
+Pi. It uses the upstream image's stable major tag, host networking for LAN wake
+packets, and persistent data beside the Compose file. Copy it to
+`/opt/upsnap/compose.yaml` on the Pi after installing Docker, then run:
+
+```console
+sudo docker compose -f /opt/upsnap/compose.yaml up -d
+```
+
+Open `http://relay.local:8090` on the LAN and complete UpSnap's account setup.
+Add the PC with MAC `34:5a:60:c2:aa:61` and IP `10.44.15.86`. This provides a
+manual wake button; automatic waking on service access remains unresolved.
+
+Update its image with:
+
+```console
+sudo docker compose -f /opt/upsnap/compose.yaml pull
+sudo docker compose -f /opt/upsnap/compose.yaml up -d
+```
+
 ## `extract-vfct-rom`
 
 Extracts a PCI option ROM from the host firmware ACPI VFCT table:
@@ -43,14 +83,6 @@ address, not necessarily from the host address.
 
 Both commands support `--list` for inspection and refuse to overwrite outputs
 unless `--force` is passed.
-
-## `sunshine-mode-switch.sh`
-
-Switches a KDE output to the first available requested mode before Sunshine
-starts streaming, then restores the previous mode afterward. The Sunshine
-module packages this script with its output name and runtime dependencies, so
-it is normally invoked through Sunshine's preparation commands rather than
-directly.
 
 ## Steam
 
