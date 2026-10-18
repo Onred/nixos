@@ -66,6 +66,27 @@ in
     };
   };
 
+  networking.firewall.interfaces.enp6s0.allowedTCPPorts = [ 8080 ];
+
+  systemd.sockets.open-webui-remote = {
+    description = "Private remote access to Open WebUI";
+    wantedBy = [ "sockets.target" ];
+    listenStreams = [ "0.0.0.0:8080" ];
+    socketConfig.Accept = true;
+  };
+
+  # Each remote connection holds sleep off until that connection closes.
+  systemd.services."open-webui-remote@" = {
+    description = "Open WebUI connection with sleep inhibition";
+    wants = [ "open-webui.service" ];
+    after = [ "open-webui.service" ];
+    serviceConfig = {
+      ExecStart = "${pkgs.systemd}/bin/systemd-inhibit --what=idle:sleep --who=Open-WebUI --why=Remote-AI ${pkgs.socat}/bin/socat - TCP:127.0.0.1:${toString config.services.open-webui.port}";
+      StandardInput = "socket";
+      StandardOutput = "inherit";
+    };
+  };
+
   systemd.services.open-webui = {
     wants = [ "ollama.service" ];
     after = [ "ollama.service" ];

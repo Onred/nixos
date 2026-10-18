@@ -1,8 +1,12 @@
-{ pkgs, ... }:
+{ pkgs, username, ... }:
 
 {
   services.desktopManager.plasma6.enable = true;
   services.displayManager.plasma-login-manager.enable = true;
+  services.displayManager.autoLogin = {
+    enable = true;
+    user = username;
+  };
   programs.kdeconnect.enable = true;
 
   systemd.user.services.plasma-login-powerdevil = {

@@ -72,8 +72,6 @@ in
   users.users.${username} = {
     extraGroups = [ "gamemode" ];
     packages = with pkgs; [
-      faugus-launcher
-      lutris
       mangohud
       protonplus
       steamDesktopInput

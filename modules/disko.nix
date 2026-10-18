@@ -48,6 +48,11 @@
               "/home" = {
                 mountpoint = "/home";
               };
+
+              "/swap" = {
+                mountpoint = "/swap";
+                swap.swapfile.size = "64G";
+              };
             };
           };
         };
