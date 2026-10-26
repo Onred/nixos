@@ -10,5 +10,6 @@
     ./virtualisation.nix
     ./gpu-passthrough.nix
     ./restic.nix
+    ./local-ai
   ];
 }

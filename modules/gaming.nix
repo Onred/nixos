@@ -19,4 +19,11 @@
       protonplus
     ];
   };
+
+  services.restic.backups.desktop.exclude = [
+    "/home/${username}/.local/share/Steam/steamapps/common"
+    "/home/${username}/.local/share/Steam/steamapps/downloading"
+    "/home/${username}/.local/share/Steam/steamapps/shadercache"
+    "/home/${username}/.local/share/Steam/steamapps/temp"
+  ];
 }

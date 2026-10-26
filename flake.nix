@@ -2,11 +2,9 @@
   description = "Onred's NixOS configuration";
 
   inputs = {
-    # Main system packages. Switch to the line below once 26.11 is released.
     nixpkgs.url = "nixpkgs/nixos-unstable";
     # nixpkgs.url = "nixpkgs/nixos-26.11";
 
-    # Selected newer packages, even after the main input moves to a release.
     nixpkgs-unstable.url = "nixpkgs/nixos-unstable";
 
     disko = {
@@ -25,7 +23,6 @@
     nixosConfigurations.nixos = inputs.nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
 
-      # Additional arguments available to every configuration module.
       specialArgs = {
         inherit inputs;
         username = "onred";

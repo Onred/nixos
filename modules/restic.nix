@@ -14,10 +14,6 @@
 
     exclude = [
       "/home/${username}/.cache"
-      "/home/${username}/.local/share/Steam/steamapps/common"
-      "/home/${username}/.local/share/Steam/steamapps/downloading"
-      "/home/${username}/.local/share/Steam/steamapps/shadercache"
-      "/home/${username}/.local/share/Steam/steamapps/temp"
       "/home/${username}/.local/share/Trash"
       "/persist/var/lib/restic/password"
     ];
