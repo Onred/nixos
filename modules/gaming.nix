@@ -1,68 +1,11 @@
-{
-  pkgs,
-  username,
-  ...
-}:
-
-let
-  steamDesktopInput = pkgs.writeShellApplication {
-    name = "steam-desktop-input";
-    runtimeInputs = [ pkgs.nodejs ];
-    text = ''
-      exec node ${../scripts/steam/desktop-input.mjs} "$@"
-    '';
-  };
-
-  watcherPython = pkgs.python3.withPackages (pythonPackages: [ pythonPackages.dbus-next ]);
-
-  steamDesktopInputWatcher = pkgs.writeShellApplication {
-    name = "steam-desktop-input-watcher";
-    runtimeInputs = [ steamDesktopInput ];
-    text = ''
-      exec ${watcherPython}/bin/python ${../scripts/steam/desktop-input-watcher.py}
-    '';
-  };
-
-  steamDesktopInputFocus = pkgs.stdenvNoCC.mkDerivation {
-    pname = "steam-desktop-input-focus";
-    version = "1.0";
-    src = ../scripts/steam/desktop-input-focus;
-    installPhase = ''
-      runHook preInstall
-      mkdir -p $out/share/kwin/scripts/steam-desktop-input-focus
-      cp -r . $out/share/kwin/scripts/steam-desktop-input-focus
-      runHook postInstall
-    '';
-  };
-
-  steamDesktopInputDbus = pkgs.writeTextDir "share/dbus-1/services/org.onred.SteamDesktopInput.service" ''
-    [D-BUS Service]
-    Name=org.onred.SteamDesktopInput
-    Exec=${steamDesktopInputWatcher}/bin/steam-desktop-input-watcher
-    SystemdService=steam-desktop-input-watcher.service
-  '';
-in
+{ pkgs, username, ... }:
 
 {
-  # Plasma 6.6 cannot restrict this input-emulation permission by application.
-  environment.etc."xdg/kwinrc".text = ''
-    [Plugins]
-    steam-desktop-input-focusEnabled=true
-
-    [Xwayland]
-    XwaylandEisNoPrompt=true
-  '';
-
-  services.dbus.packages = [ steamDesktopInputDbus ];
-
   programs.steam = {
     enable = true;
     remotePlay.openFirewall = true;
     package = pkgs.steam.override {
       extraArgs = "-pipewire";
-      extraEnv = {
-        PROTON_ENABLE_WAYLAND = "1";
-      };
     };
   };
 
@@ -74,26 +17,13 @@ in
     packages = with pkgs; [
       mangohud
       protonplus
-      steamDesktopInput
-      steamDesktopInputFocus
     ];
   };
 
-  systemd.user.services.steam-desktop-input-watcher = {
-    description = "Follow KWin focus for Steam desktop input";
-    wantedBy = [ "graphical-session.target" ];
-    partOf = [ "graphical-session.target" ];
-    serviceConfig = {
-      Type = "dbus";
-      BusName = "org.onred.SteamDesktopInput";
-      ExecStart = "${steamDesktopInputWatcher}/bin/steam-desktop-input-watcher";
-      ExecStopPost = "-${steamDesktopInput}/bin/steam-desktop-input on";
-      Restart = "on-failure";
-      RestartSec = "1s";
-    };
-  };
-
-  systemd.tmpfiles.rules = [
-    "f /home/${username}/.local/share/Steam/.cef-enable-remote-debugging 0600 ${username} users -"
+  services.restic.backups.desktop.exclude = [
+    "/home/${username}/.local/share/Steam/steamapps/common"
+    "/home/${username}/.local/share/Steam/steamapps/downloading"
+    "/home/${username}/.local/share/Steam/steamapps/shadercache"
+    "/home/${username}/.local/share/Steam/steamapps/temp"
   ];
 }

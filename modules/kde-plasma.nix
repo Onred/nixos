@@ -2,12 +2,13 @@
 
 {
   services.desktopManager.plasma6.enable = true;
-  services.displayManager.plasma-login-manager.enable = true;
-  services.displayManager.autoLogin = {
-    enable = true;
-    user = username;
+  services.displayManager = {
+    plasma-login-manager.enable = true;
+    autoLogin = {
+      enable = true;
+      user = username;
+    };
   };
-  programs.kdeconnect.enable = true;
 
   systemd.user.services.plasma-login-powerdevil = {
     description = "PowerDevil for the login screen";
@@ -24,9 +25,8 @@
     };
   };
 
-  environment.systemPackages = with pkgs; [
-    kdePackages.plasma-vault
-  ];
+  programs.kdeconnect.enable = true;
+  environment.systemPackages = [ pkgs.kdePackages.plasma-vault ];
 
   environment.persistence."/persist".directories = [
     {

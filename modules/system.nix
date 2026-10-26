@@ -14,9 +14,14 @@
   ];
   nixpkgs.config.allowUnfree = true;
 
-  networking.hostName = hostName;
-  networking.networkmanager.enable = true;
-  networking.networkmanager.plugins = [ pkgs.networkmanager-openvpn ];
+  networking = {
+    hostName = hostName;
+    networkmanager = {
+      enable = true;
+      # Supports the imperatively imported OpenVPN connection; no declarative VPN config here.
+      plugins = [ pkgs.networkmanager-openvpn ];
+    };
+  };
 
   hardware.bluetooth.enable = true;
   hardware.graphics.enable = true;
@@ -24,15 +29,17 @@
   time.timeZone = "Asia/Tokyo";
   i18n.defaultLocale = "en_US.UTF-8";
 
-  users.mutableUsers = false;
-  users.users.${username} = {
-    isNormalUser = true;
-    description = fullName;
-    hashedPasswordFile = lib.mkDefault "/persist/secrets/${username}-password-hash";
-    extraGroups = [
-      "networkmanager"
-      "wheel"
-    ];
+  users = {
+    mutableUsers = false;
+    users.${username} = {
+      isNormalUser = true;
+      description = fullName;
+      hashedPasswordFile = lib.mkDefault "/persist/secrets/${username}-password-hash";
+      extraGroups = [
+        "networkmanager"
+        "wheel"
+      ];
+    };
   };
 
   security.rtkit.enable = true;
@@ -50,18 +57,21 @@
     "/var/lib/fwupd"
   ];
 
-  boot.kernelPackages = pkgs.linuxPackages_latest;
-
-  boot.loader.limine = {
-    enable = true;
-    secureBoot.enable = true;
-    resolution = lib.mkDefault "2560x1440";
-    style = {
-      graphicalTerminal.background = lib.mkDefault "ff000000";
-      wallpapers = lib.mkOverride 900 [ ../wallpapers/limine.png ];
+  boot = {
+    kernelPackages = pkgs.linuxPackages_latest;
+    loader = {
+      efi.canTouchEfiVariables = true;
+      limine = {
+        enable = true;
+        secureBoot.enable = true;
+        resolution = lib.mkDefault "2560x1440";
+        style = {
+          graphicalTerminal.background = lib.mkDefault "ff000000";
+          wallpapers = lib.mkOverride 900 [ ../wallpapers/limine.png ];
+        };
+      };
     };
   };
 
-  boot.loader.efi.canTouchEfiVariables = true;
   system.stateVersion = "26.11";
 }

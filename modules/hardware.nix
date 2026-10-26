@@ -1,5 +1,3 @@
-{ config, ... }:
-
 {
   networking.networkmanager.settings.connection."ethernet.wake-on-lan" = "magic";
 
@@ -9,6 +7,7 @@
     open = true;
     nvidiaSettings = false;
     branch = "latest";
+    moduleParams.nvidia.NVreg_TemporaryFilePath = "/var/tmp";
   };
 
   fileSystems."/mnt/data" = {
@@ -40,9 +39,7 @@
             ];
             "priority.session" = 2000;
           };
-          "stream.props" = {
-            "stream.dont-remix" = true;
-          };
+          "stream.props"."stream.dont-remix" = true;
           "stream.rules" = [
             {
               matches = [
@@ -51,17 +48,15 @@
                   "node.name" = "alsa_output.usb-Audient_EVO4-00.pro-output-0";
                 }
               ];
-              actions = {
-                "create-stream" = {
-                  "combine.audio.position" = [
-                    "FL"
-                    "FR"
-                  ];
-                  "audio.position" = [
-                    "AUX0"
-                    "AUX1"
-                  ];
-                };
+              actions."create-stream" = {
+                "combine.audio.position" = [
+                  "FL"
+                  "FR"
+                ];
+                "audio.position" = [
+                  "AUX0"
+                  "AUX1"
+                ];
               };
             }
           ];
@@ -88,11 +83,9 @@
             "device.name" = "~alsa_card.usb-Audient_EVO4.*";
           }
         ];
-        actions = {
-          update-props = {
-            "device.profile" = "pro-audio";
-            "device.nick" = "Audient EVO 4";
-          };
+        actions.update-props = {
+          "device.profile" = "pro-audio";
+          "device.nick" = "Audient EVO 4";
         };
       }
     ];

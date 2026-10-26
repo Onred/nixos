@@ -10,42 +10,42 @@
   programs.firefox.enable = true;
   programs.nix-ld.enable = true;
 
-  fonts.packages = with pkgs; [
-    nerd-fonts.jetbrains-mono
-    inter
-  ];
-
-  fonts.fontconfig.defaultFonts.sansSerif = [
-    "Inter"
-    "Noto Sans"
-  ];
-
-  users.users.${username}.packages = with pkgs; [
-    # Desktop
-    alacritty
-    discord
-    drawy
-    libreoffice-qt6
-    localsend
-    pavucontrol
-    vscode
-    zed-editor
-    btop
-    fastfetch
-    neovim
+  users.users.${username}.packages = [
+    pkgs.alacritty
+    pkgs.discord
+    pkgs.drawy
+    pkgs.libreoffice-qt6
+    pkgs.localsend
+    pkgs.pavucontrol
+    pkgs.vscode
+    pkgs.zed-editor
+    pkgs.btop
+    pkgs.fastfetch
+    pkgs.neovim
     unstable.codex
   ];
 
-  environment.systemPackages = with pkgs; [
-    gh
-    git
-    jq
-    nh
-    pciutils
-    sbctl
-    tree
-    usbutils
-    vim
-    wget
+  environment.systemPackages = [
+    pkgs.gh
+    pkgs.git
+    pkgs.jq
+    pkgs.nh
+    pkgs.pciutils
+    pkgs.sbctl
+    pkgs.tree
+    pkgs.usbutils
+    pkgs.vim
+    pkgs.wget
   ];
+
+  fonts = {
+    packages = [
+      pkgs.nerd-fonts.jetbrains-mono
+      pkgs.inter
+    ];
+    fontconfig.defaultFonts.sansSerif = [
+      "Inter"
+      "Noto Sans"
+    ];
+  };
 }

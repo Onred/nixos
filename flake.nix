@@ -2,14 +2,10 @@
   description = "Onred's NixOS configuration";
 
   inputs = {
-    # Return the main input to nixos-26.11 after its package freeze.
     nixpkgs.url = "nixpkgs/nixos-unstable";
-    nixpkgs-unstable.url = "nixpkgs/nixos-unstable";
+    # nixpkgs.url = "nixpkgs/nixos-26.11";
 
-    nixos-update-checker = {
-      url = "github:Onred/nixos-update-checker";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    nixpkgs-unstable.url = "nixpkgs/nixos-unstable";
 
     disko = {
       url = "github:nix-community/disko/latest";
@@ -23,49 +19,23 @@
     };
   };
 
-  outputs =
-    inputs@{
-      self,
-      nixpkgs,
-      nixpkgs-unstable,
-      disko,
-      ...
-    }:
-    let
-      # Local system settings
+  outputs = inputs: {
+    nixosConfigurations.nixos = inputs.nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
-      hostName = "nixos";
-      username = "onred";
-      fullName = "Onred";
 
-      pkgs = import nixpkgs {
-        inherit system;
-        config.allowUnfree = true;
-      };
-      unstable = import nixpkgs-unstable {
-        inherit system;
-        config.allowUnfree = true;
-      };
-      installer = import ./lib/installer.nix {
-        inherit hostName pkgs username;
-        configSource = self;
-        diskoPackage = disko.packages.${system}.disko;
-      };
-    in
-    {
-      apps.${system}.install = {
-        type = "app";
-        program = "${installer}/bin/install-nixos";
-        meta.description = "Install this NixOS configuration onto an explicitly selected disk";
-      };
+      specialArgs = {
+        inherit inputs;
+        username = "onred";
+        fullName = "Onred";
+        hostName = "nixos";
 
-      nixosConfigurations.${hostName} = nixpkgs.lib.nixosSystem {
-        inherit system;
-        specialArgs = {
-          inherit inputs unstable;
-          inherit fullName hostName username;
+        unstable = import inputs.nixpkgs-unstable {
+          system = "x86_64-linux";
+          config.allowUnfree = true;
         };
-        modules = [ ./configuration.nix ];
       };
+
+      modules = [ ./configuration.nix ];
     };
+  };
 }
