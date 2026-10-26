@@ -1,7 +1,6 @@
 {
   imports = [
     ./system.nix
-    ./remote-access.nix
     ./disko.nix
     ./impermanence.nix
     ./hardware.nix
@@ -10,10 +9,6 @@
     ./gaming.nix
     ./virtualisation.nix
     ./gpu-passthrough.nix
-    ./local-ai
-    ./strata.nix
-    ./backup.nix
-    ./sunshine.nix
-    ./nixos-update-checker.nix
+    ./restic.nix
   ];
 }

@@ -6,8 +6,7 @@
   disko.devices.disk.main = {
     type = "disk";
 
-    # Deliberately invalid: the installer will supply the selected target with
-    # `disko-install --disk main ...`.
+    # Formatting requires an explicitly selected target disk.
     device = "/dev/disk/by-id/SET_TARGET_DISK_DURING_INSTALL";
 
     content = {

@@ -20,9 +20,6 @@
       "/home/${username}/.local/share/Steam/steamapps/temp"
       "/home/${username}/.local/share/Trash"
       "/persist/var/lib/restic/password"
-      "/persist/var/lib/libvirt/images"
-      "/persist/var/lib/comfyui/models"
-      "/persist/var/lib/private/ollama"
     ];
 
     pruneOpts = [
@@ -39,15 +36,15 @@
     };
   };
 
+  systemd.services.restic-backups-desktop.unitConfig = {
+    ConditionPathExists = "/var/lib/restic/password";
+    RequiresMountsFor = "/mnt/data";
+  };
+
   environment.persistence."/persist".files = [
     {
       file = "/var/lib/restic/password";
       parentDirectory.mode = "0700";
     }
   ];
-
-  systemd.services.restic-backups-desktop.unitConfig = {
-    ConditionPathExists = "/var/lib/restic/password";
-    RequiresMountsFor = "/mnt/data";
-  };
 }
